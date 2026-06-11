@@ -1,0 +1,43 @@
+name: Supabase keep-alive
+
+# Free-tier Supabase projects pause after ~7 days with no API/DB activity,
+# which makes the *.supabase.co host stop resolving (ERR_NAME_NOT_RESOLVED)
+# and breaks login + widget saving. This workflow runs a tiny REST query
+# every day so Supabase always sees recent activity and never pauses.
+#
+# Runs on GitHub's infrastructure, so it works even when no one's computer
+# is on. Cost is negligible (one ~1s curl per day).
+
+on:
+  schedule:
+    # 06:00 UTC daily. GitHub may delay/skip scheduled runs under load,
+    # so daily (vs every few days) keeps a safe margin under the 7-day window.
+    - cron: '0 6 * * *'
+  workflow_dispatch: {} # allow manual "Run workflow" from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query Supabase REST to register activity
+        env:
+          SUPABASE_URL: https://vyycfwgkawtqkjllvsuc.supabase.co
+          # Public anon key (same one shipped in the browser bundle, RLS-protected).
+          # Stored as a repo secret so rotating the key doesn't require a code edit.
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::SUPABASE_ANON_KEY secret is not set. Add it in Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/widgets?select=id&limit=1")
+          echo "Supabase REST responded with HTTP $code"
+          # 200 = healthy. Any 2xx/4xx still means the request reached the
+          # project (= activity). Only a network failure (000) is a problem.
+          if [ "$code" = "000" ]; then
+            echo "::error::Could not reach Supabase — project may be paused or deleted."
+            exit 1
+          fi
