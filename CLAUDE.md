@@ -320,6 +320,13 @@ Smoke tests print `[SMOKE]` tagged output to stdout, covering:
 **Project:** `https://vyycfwgkawtqkjllvsuc.supabase.co`
 **Ref:** `vyycfwgkawtqkjllvsuc`
 
+> ⚠️ **Free-tier auto-pause:** this project pauses after ~7 days idle, which
+> drops its DNS and breaks login + widget saving with `ERR_NAME_NOT_RESOLVED`
+> (looks like a Google-auth bug but the whole backend is down). A daily GitHub
+> Actions keep-alive (`.github/workflows/supabase-keepalive.yml` on `main`,
+> needs the `SUPABASE_ANON_KEY` repo secret) pings it so it never pauses. To
+> diagnose/restore a paused project, see `docs/SUPABASE.md` §9.
+
 ### Environment Variables
 
 ```env

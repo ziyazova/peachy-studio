@@ -245,6 +245,7 @@ src/
 | Google OAuth redirect fails | Check redirect URI matches exactly in Google Console + Supabase |
 | Session lost on refresh | Check `supabase.auth.getSession()` runs in `useEffect` |
 | Guest mode persists after login | `onAuthStateChange` clears guest flag when Supabase session appears |
+| **`ERR_NAME_NOT_RESOLVED` / "This site can't be reached" on `*.supabase.co`** (Google login, email login AND widget saving all break at once) | **Project auto-paused** — free-tier Supabase pauses after ~7 days idle and drops its DNS. Not a code bug. **Restore it** (see §9). This is NOT a Google-specific issue — the whole backend is down; Google is just usually noticed first. |
 
 ### Database Issues
 
@@ -283,3 +284,78 @@ src/
 - **Real-time sync** — Supabase Realtime for collaborative editing
 - **Storage** — Supabase Storage for user-uploaded images (boards)
 - **Edge Functions** — Supabase Edge Functions for payment processing (Stripe webhooks)
+
+## 9. Free-Tier Auto-Pause & Keep-Alive
+
+**Free-tier Supabase projects pause after ~7 days with no API/DB activity.** A
+paused project's `*.supabase.co` host stops resolving (`NXDOMAIN`), so the
+browser shows **"This site can't be reached" / `ERR_NAME_NOT_RESOLVED`** the
+moment any auth call or REST query fires. Symptoms look auth-specific (Google
+login fails first) but the **entire backend is down** — email login and widget
+saving break too. No code change fixes this; the project must be woken up.
+
+### 9.1 Diagnose
+
+```bash
+# NXDOMAIN here = project is paused or deleted (not a network/firewall issue
+# as long as `host supabase.com` resolves fine)
+host vyycfwgkawtqkjllvsuc.supabase.co
+
+# Confirm via Management API (uses the token the Supabase CLI stored in the
+# macOS keychain under service "Supabase CLI"). STATUS=INACTIVE => paused.
+RAW=$(security find-generic-password -s "Supabase CLI" -w)
+TOKEN=$(echo "${RAW#go-keyring-base64:}" | base64 -d)
+curl -s -H "Authorization: Bearer $TOKEN" https://api.supabase.com/v1/projects \
+  | python3 -c "import sys,json;[print(p['name'],p['id'],p['status']) for p in json.load(sys.stdin)]"
+```
+
+If the project still shows in the list it's **paused** (restorable). If it's
+gone entirely it was **deleted** → create a new project and update
+`VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` in `.env.local` and Vercel, then
+re-run migrations (`npx supabase db push`) and re-configure Google OAuth.
+
+### 9.2 Restore a paused project
+
+**Option A — Dashboard (normal path):** open
+`https://supabase.com/dashboard/project/vyycfwgkawtqkjllvsuc` → click
+**Restore / Resume project**. DNS comes back in ~2–5 min.
+
+**Option B — Management API (what we used June 2026):**
+```bash
+RAW=$(security find-generic-password -s "Supabase CLI" -w)
+TOKEN=$(echo "${RAW#go-keyring-base64:}" | base64 -d)
+curl -s -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  https://api.supabase.com/v1/projects/vyycfwgkawtqkjllvsuc/restore -d '{}'   # → HTTP 200
+```
+
+**Verify it's live** (200 on both = ready; auth provider check is a bonus):
+```bash
+KEY=$(grep '^VITE_SUPABASE_ANON_KEY=' .env.local | cut -d= -f2-)
+curl -s -o /dev/null -w "REST %{http_code}\n" -H "apikey: $KEY" \
+  "https://vyycfwgkawtqkjllvsuc.supabase.co/rest/v1/widgets?select=id&limit=1"
+curl -s -o /dev/null -w "AUTH %{http_code}\n" -H "apikey: $KEY" \
+  "https://vyycfwgkawtqkjllvsuc.supabase.co/auth/v1/settings"
+```
+
+### 9.3 Prevention — GitHub Actions keep-alive
+
+To stop the project pausing in the first place, a scheduled workflow makes one
+tiny REST query per day so Supabase always sees recent activity.
+
+- **File:** `.github/workflows/supabase-keepalive.yml` (committed on `main`)
+- **Schedule:** daily `0 6 * * *` UTC, plus manual `workflow_dispatch`
+- **What it does:** `GET /rest/v1/widgets?select=id&limit=1` with the anon key
+- **Secret:** `SUPABASE_ANON_KEY` (repo → Settings → Secrets and variables →
+  Actions). It's the public anon key, but stored as a secret so key rotation
+  doesn't need a code edit.
+
+⚠️ **Must live on the default branch (`main`)** — GitHub only fires `schedule`
+triggers from the default branch. A copy on a feature branch never runs.
+
+**Why GitHub Actions (not Vercel Cron / pg_cron):** runs on GitHub's infra so
+it works with every dev machine off; Vercel Hobby cron is max once/day and needs
+a serverless function (this is a pure Vite SPA); `pg_cron` runs inside the DB so
+a paused project can't keep itself alive.
+
+**If the project/key ever changes:** update the `SUPABASE_ANON_KEY` repo secret
+and the hardcoded `SUPABASE_URL` inside the workflow file.
