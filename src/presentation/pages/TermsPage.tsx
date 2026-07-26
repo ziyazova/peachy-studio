@@ -383,7 +383,7 @@ export const TermsPage: React.FC = () => (
             ec.europa.eu/consumers/odr
           </ContactLink>.
           We prefer to resolve complaints directly — please email us first at{' '}
-          <ContactLink href="mailto:ziyazovaa@gmail.com">ziyazovaa@gmail.com</ContactLink>.
+          <ContactLink href="mailto:yourpeachyplanner@gmail.com">yourpeachyplanner@gmail.com</ContactLink>.
         </P>
         <P>
           Additional disclosures required under the e-Commerce Directive (operator identity,
@@ -399,7 +399,7 @@ export const TermsPage: React.FC = () => (
         </SectionHead>
         <P>
           Questions about these terms:{' '}
-          <ContactLink href="mailto:ziyazovaa@gmail.com">ziyazovaa@gmail.com</ContactLink>.
+          <ContactLink href="mailto:yourpeachyplanner@gmail.com">yourpeachyplanner@gmail.com</ContactLink>.
         </P>
       </Section>
       </BodyInner>

@@ -260,7 +260,7 @@ export const LegalPage: React.FC = () => (
           <Row>
             <RowLabel>Email</RowLabel>
             <RowValue>
-              <ContactLink href="mailto:ziyazovaa@gmail.com">ziyazovaa@gmail.com</ContactLink>
+              <ContactLink href="mailto:yourpeachyplanner@gmail.com">yourpeachyplanner@gmail.com</ContactLink>
             </RowValue>
           </Row>
           <Row>
@@ -354,7 +354,7 @@ export const LegalPage: React.FC = () => (
           </P>
           <P>
             We prefer to resolve complaints directly — please email us first at{' '}
-            <ContactLink href="mailto:ziyazovaa@gmail.com">ziyazovaa@gmail.com</ContactLink>.
+            <ContactLink href="mailto:yourpeachyplanner@gmail.com">yourpeachyplanner@gmail.com</ContactLink>.
             We are not required to participate in alternative dispute resolution procedures
             but will respond promptly to any ODR submission.
           </P>
@@ -395,7 +395,7 @@ export const LegalPage: React.FC = () => (
           </SectionHead>
           <P>
             Questions about any of the above:{' '}
-            <ContactLink href="mailto:ziyazovaa@gmail.com">ziyazovaa@gmail.com</ContactLink>.
+            <ContactLink href="mailto:yourpeachyplanner@gmail.com">yourpeachyplanner@gmail.com</ContactLink>.
           </P>
         </Section>
       </BodyInner>

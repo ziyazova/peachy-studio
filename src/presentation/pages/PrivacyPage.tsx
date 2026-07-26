@@ -273,7 +273,7 @@ export const PrivacyPage: React.FC = () => (
         <P>
           Peachy Studio is operated from Stockholm, Sweden, and acts as the data controller for any
           personal data you provide. For any question about this policy or your data, contact{' '}
-          <ContactLink href="mailto:ziyazovaa@gmail.com">ziyazovaa@gmail.com</ContactLink>.
+          <ContactLink href="mailto:yourpeachyplanner@gmail.com">yourpeachyplanner@gmail.com</ContactLink>.
         </P>
       </Section>
 
@@ -443,7 +443,7 @@ export const PrivacyPage: React.FC = () => (
         </SectionHead>
         <P>
           Questions, concerns or data requests:{' '}
-          <ContactLink href="mailto:ziyazovaa@gmail.com">ziyazovaa@gmail.com</ContactLink>.
+          <ContactLink href="mailto:yourpeachyplanner@gmail.com">yourpeachyplanner@gmail.com</ContactLink>.
           We respond within 14 days.
         </P>
       </Section>

@@ -234,7 +234,7 @@ export const RefundPage: React.FC = () => (
           </P>
           <P>
             If you do <strong>not</strong> tick the box, you have 14 days from the date of purchase
-            to withdraw by emailing <ContactLink href="mailto:ziyazovaa@gmail.com">ziyazovaa@gmail.com</ContactLink>{' '}
+            to withdraw by emailing <ContactLink href="mailto:yourpeachyplanner@gmail.com">yourpeachyplanner@gmail.com</ContactLink>{' '}
             — we will refund you in full within 14 days of receiving your notice, and your access
             will be revoked.
           </P>
@@ -249,7 +249,7 @@ export const RefundPage: React.FC = () => (
             Beyond the statutory withdrawal right, we offer a goodwill refund to first-time
             subscribers. If within <strong>7 days</strong> of your first Pro payment you are
             unsatisfied for any reason, email us at{' '}
-            <ContactLink href="mailto:ziyazovaa@gmail.com">ziyazovaa@gmail.com</ContactLink>{' '}
+            <ContactLink href="mailto:yourpeachyplanner@gmail.com">yourpeachyplanner@gmail.com</ContactLink>{' '}
             and we'll refund that payment, no questions asked.
           </P>
           <P>
@@ -367,7 +367,7 @@ export const RefundPage: React.FC = () => (
           </SectionHead>
           <P>
             If you see a charge you don't recognise or are unhappy with, email{' '}
-            <ContactLink href="mailto:ziyazovaa@gmail.com">ziyazovaa@gmail.com</ContactLink>{' '}
+            <ContactLink href="mailto:yourpeachyplanner@gmail.com">yourpeachyplanner@gmail.com</ContactLink>{' '}
             before opening a chargeback with your bank. In almost every case we'll resolve it
             faster than your bank would (often within a day). Filing a chargeback without
             contacting us costs us a fixed fee even if we're not at fault, and it slows the
@@ -402,7 +402,7 @@ export const RefundPage: React.FC = () => (
           </SectionHead>
           <P>
             Refund requests, cancellation help, or questions about this policy:{' '}
-            <ContactLink href="mailto:ziyazovaa@gmail.com">ziyazovaa@gmail.com</ContactLink>.
+            <ContactLink href="mailto:yourpeachyplanner@gmail.com">yourpeachyplanner@gmail.com</ContactLink>.
             We aim to respond within 2 business days.
           </P>
         </Section>
