@@ -19,6 +19,10 @@ export class Widget {
     return new Widget(id, 'board', settings);
   }
 
+  static createTimer(id: string, settings: any): Widget {
+    return new Widget(id, 'timer', settings);
+  }
+
   updateSettings(newSettings: Record<string, any>): Widget {
     const mergedSettings = { ...this.settings, ...newSettings };
     return new Widget(this.id, this.type, mergedSettings);

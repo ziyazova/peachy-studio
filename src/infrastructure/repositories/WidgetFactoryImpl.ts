@@ -3,6 +3,7 @@ import { WidgetFactory } from '../../domain/repositories/WidgetRepository';
 import { CalendarSettings } from '../../domain/value-objects/CalendarSettings';
 import { ClockSettings } from '../../domain/value-objects/ClockSettings';
 import { BoardSettings } from '../../domain/value-objects/BoardSettings';
+import { TimerSettings } from '../../domain/value-objects/TimerSettings';
 import { Logger } from '../services/Logger';
 
 export class WidgetFactoryImpl implements WidgetFactory {
@@ -22,6 +23,11 @@ export class WidgetFactoryImpl implements WidgetFactory {
         return Widget.createBoard(
           this.generateId(),
           new BoardSettings(settings)
+        );
+      case 'timer':
+        return Widget.createTimer(
+          this.generateId(),
+          new TimerSettings(settings)
         );
       default:
         throw new Error(`Unsupported widget type: ${type}`);
@@ -66,13 +72,28 @@ export class WidgetFactoryImpl implements WidgetFactory {
           columns: 2,
           gap: 8,
         };
+      case 'timer':
+        return {
+          primaryColor: '#667EEA',
+          backgroundColor: '#FFFFFF',
+          accentColor: '#F1F5F9',
+          borderRadius: 12,
+          showBorder: false,
+          style: 'bell',
+          bgPreset: 'sage',
+          durationMin: 10,
+          intervalBellMin: 0,
+          endSound: 'bowl',
+          breathPattern: 'coherent',
+          showTimeLeft: true,
+        };
       default:
         return {};
     }
   }
 
   getSupportedTypes(): string[] {
-    return ['calendar', 'clock', 'board'];
+    return ['calendar', 'clock', 'board', 'timer'];
   }
 
   private generateId(): string {

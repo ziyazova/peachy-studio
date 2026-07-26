@@ -13,6 +13,7 @@ import { CheckoutPage } from './presentation/pages/CheckoutPage';
 import { CalendarEmbedPage } from './presentation/pages/CalendarEmbedPage';
 import { ClockEmbedPage } from './presentation/pages/ClockEmbedPage';
 import { BoardEmbedPage } from './presentation/pages/BoardEmbedPage';
+import { TimerEmbedPage } from './presentation/pages/TimerEmbedPage';
 import { ErrorBoundary } from './presentation/components/ErrorBoundary';
 import { DebugOverlay } from './presentation/components/debug/DebugOverlay';
 import { ClaudeFeedback } from './presentation/components/dev/ClaudeFeedback';
@@ -91,6 +92,7 @@ function App() {
               <Route path="/embed/calendar" element={<CalendarEmbedPage />} />
               <Route path="/embed/clock" element={<ClockEmbedPage />} />
               <Route path="/embed/board" element={<BoardEmbedPage />} />
+              <Route path="/embed/timer" element={<TimerEmbedPage />} />
             </Routes>
           </Router>
         </ThemeProvider>

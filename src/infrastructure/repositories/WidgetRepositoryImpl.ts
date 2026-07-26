@@ -3,6 +3,7 @@ import { WidgetRepository } from '../../domain/repositories/WidgetRepository';
 import { CalendarSettings } from '../../domain/value-objects/CalendarSettings';
 import { ClockSettings } from '../../domain/value-objects/ClockSettings';
 import { BoardSettings } from '../../domain/value-objects/BoardSettings';
+import { TimerSettings } from '../../domain/value-objects/TimerSettings';
 import { UrlCodecService } from '../services/url-codec/UrlCodecService';
 import { Logger } from '../services/Logger';
 
@@ -62,6 +63,8 @@ export class WidgetRepositoryImpl implements WidgetRepository {
           return Widget.createClock('url-clock', new ClockSettings(settings));
         case 'board':
           return Widget.createBoard('url-board', new BoardSettings(settings));
+        case 'timer':
+          return Widget.createTimer('url-timer', new TimerSettings(settings));
         default:
           return null;
       }
@@ -97,6 +100,7 @@ export class WidgetRepositoryImpl implements WidgetRepository {
     if (url.includes('/embed/calendar')) return 'calendar';
     if (url.includes('/embed/clock')) return 'clock';
     if (url.includes('/embed/board')) return 'board';
+    if (url.includes('/embed/timer')) return 'timer';
     return 'calendar'; // default
   }
 } 

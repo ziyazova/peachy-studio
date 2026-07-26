@@ -38,6 +38,15 @@ export class CompactUrlCodec {
     columns: 'bc',
     gap: 'bg',
 
+    // Timer специфичные (m+символ). NB: new string values must be 2+ chars —
+    // decode() expands single letters through a table shared by all fields.
+    durationMin: 'md',
+    intervalBellMin: 'mi',
+    endSound: 'ms',
+    breathPattern: 'mp',
+    showTimeLeft: 'mt',
+    bgPreset: 'mb',
+
     // Weather специфичные (w+символ)
     temperatureUnit: 'wu',
     showFeelsLike: 'wf',
@@ -83,12 +92,28 @@ export class CompactUrlCodec {
     columns: 2,
     gap: 8,
 
+    // Timer
+    durationMin: 10,
+    intervalBellMin: 0,
+    endSound: 'bowl',
+    breathPattern: 'coherent',
+    showTimeLeft: true,
+    bgPreset: 'sage',
+
     // Embed size (calendar defaults; clock overrides at decode)
     embedWidth: 420,
     embedHeight: 380,
 
     // Theme
     theme: 'auto',
+  };
+
+  /** Per-type embed box, used when the URL didn't encode one explicitly. */
+  private static readonly EMBED_SIZE_DEFAULTS: Record<string, { width: number; height: number }> = {
+    calendar: { width: 420, height: 380 },
+    clock: { width: 360, height: 360 },
+    board: { width: 420, height: 420 },
+    timer: { width: 360, height: 540 },
   };
 
   // Цвета из палитры кодируем индексами (0-9, a-f для 16 цветов)
@@ -102,7 +127,7 @@ export class CompactUrlCodec {
     const compact: Record<string, any> = {};
 
     // Добавляем тип виджета одним символом
-    const typeMap: Record<string, string> = { calendar: 'c', clock: 'k', weather: 'w', board: 'b' };
+    const typeMap: Record<string, string> = { calendar: 'c', clock: 'k', weather: 'w', board: 'b', timer: 'm' };
     compact._ = typeMap[widgetType] || widgetType;
 
     // Обрабатываем каждое поле
@@ -181,11 +206,22 @@ export class CompactUrlCodec {
       const compact = JSON.parse(json);
 
       // Восстанавливаем тип виджета
-      const typeReverseMap: Record<string, string> = { c: 'calendar', k: 'clock', w: 'weather', b: 'board' };
+      const typeReverseMap: Record<string, string> = { c: 'calendar', k: 'clock', w: 'weather', b: 'board', m: 'timer' };
       const widgetType = typeReverseMap[compact._] || compact._;
       delete compact._;
 
       const settings: Record<string, any> = { ...this.DEFAULTS };
+
+      /* DEFAULTS carries the CALENDAR embed box (420x380), so a widget that
+         never encoded its own size would decode at calendar proportions —
+         a square timer would then be scaled inside a 420x380 reference and
+         render visibly off-centre. Apply the type's own default instead
+         whenever the payload didn't carry 'ew'/'eh'. */
+      const sizeDefault = this.EMBED_SIZE_DEFAULTS[widgetType];
+      if (sizeDefault) {
+        if (!('ew' in compact)) settings.embedWidth = sizeDefault.width;
+        if (!('eh' in compact)) settings.embedHeight = sizeDefault.height;
+      }
 
       // Восстанавливаем поля
       for (const [shortKey, value] of Object.entries(compact)) {

@@ -4,6 +4,7 @@ import { Widget } from '../../../domain/entities/Widget';
 import { CalendarWidget } from '../widgets/CalendarWidget';
 import { ClockWidget } from '../widgets/ClockWidget';
 import { BoardWidget } from '../widgets/BoardWidget';
+import { TimerWidget } from '../widgets/TimerWidget';
 
 interface WidgetDisplayProps {
   widget: Widget | null;
@@ -105,6 +106,8 @@ export const WidgetDisplay: React.FC<WidgetDisplayProps> = ({ widget }) => {
         return <ClockWidget widget={widget} />;
       case 'board':
         return <BoardWidget widget={widget} />;
+      case 'timer':
+        return <TimerWidget widget={widget} />;
       default:
         return (
           <ErrorState>
