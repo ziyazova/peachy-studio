@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plain test</title>
+</head>
+<body style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+<!-- Deliberately the dumbest page possible: no scripts, no stylesheet, no SPA
+     rewrite (this file exists on disk, so Vercel serves it directly). It exists
+     to split one question in two: if this renders inside the Notion app then our
+     DOMAIN is fine and the problem is our single-page app; if it stays blank the
+     app is refusing the domain itself, and no application change can help. -->
+<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#2E5230;color:#fff">
+  <div style="text-align:center;padding:24px">
+    <div style="font-size:40px;font-weight:600;letter-spacing:-0.02em">PLAIN HTML</div>
+    <div style="margin-top:12px;font-size:14px;opacity:.75">no scripts · no styles · no routing</div>
+  </div>
+</div>
+</body>
+</html>
