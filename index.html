@@ -93,7 +93,20 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <!-- Static no-JS fallback.
+       React 18's createRoot() clears this container on its first render, so in
+       any healthy environment it is never seen. It exists because of the Notion
+       mobile app: there the iframe showed an empty frame, and even the inline
+       boot watchdog below stayed silent — which can only happen if scripts in
+       that frame never run at all. indify.co, which DOES render in the same
+       app, ships its widget markup server-rendered in the HTML; we shipped an
+       empty <div> and relied entirely on the bundle.
+
+       So this is both the diagnostic (if it appears, scripts are the problem,
+       not our code) and the graceful degradation (something legible instead of
+       a blank rectangle). Inline styles only: styled-components injects its CSS
+       from JavaScript, so no stylesheet of ours exists at this point. -->
+  <div id="root"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"><div style="width:100%;max-width:360px;aspect-ratio:2/3;border-radius:38px;background:linear-gradient(152deg,#396539 0%,#2E5230 38%,#244228 70%,#19321E 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;box-sizing:border-box;padding:9%"><div style="font-size:56px;font-weight:400;letter-spacing:-0.025em;line-height:1">10:00</div><div style="margin-top:14px;font-size:11px;font-weight:500;letter-spacing:0.18em;opacity:0.6">MEDITATION</div><div style="margin-top:28px;font-size:12px;line-height:1.5;opacity:0.65;text-align:center;max-width:260px">Interactive timer needs JavaScript.<br>Open this widget in a browser to use it.</div></div></div></div>
 
   <!-- Boot watchdog.
        Deliberately plain ES5 in a NON-module script, placed BEFORE the bundle.
