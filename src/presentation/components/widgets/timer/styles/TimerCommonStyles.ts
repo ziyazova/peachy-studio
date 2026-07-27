@@ -38,6 +38,14 @@ export const TimerSurface = styled.div<{
   border-radius: ${({ $radius }) => $radius}px;
   overflow: hidden;
   isolation: isolate;
+  /* WebKit will not clip a COMPOSITED child to a rounded overflow — and the
+     breathing field is composited on purpose (will-change: transform). On iOS
+     that let the green paint straight over the corners, so the card read as a
+     square. Masking the element forces it to be rasterised with the rounding
+     applied, which does clip composited children. The -webkit- radial-gradient
+     form is the one Safari honours here. */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
   display: flex;
   box-sizing: border-box;
   background: ${({ $transparent, $plainBg }) => ($transparent ? 'transparent' : $plainBg)};
