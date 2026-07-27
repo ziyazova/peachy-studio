@@ -94,6 +94,59 @@
 
 <body>
   <div id="root"></div>
+
+  <!-- Boot watchdog.
+       Deliberately plain ES5 in a NON-module script, placed BEFORE the bundle.
+
+       Two reasons it lives here and not in main.tsx:
+       1. If the bundle fails to PARSE (an older Safari meeting syntax it does
+          not know), main.tsx never executes at all — a handler inside it cannot
+          catch its own module failing to load.
+       2. Logger is dev-only and is stripped from production builds, so in prod
+          a global error was previously swallowed in silence. The result was a
+          blank white page with nothing to go on, on a device with no console.
+
+       This turns that white screen into a readable report the user can
+       screenshot. It renders ONLY if #root is still empty, so a healthy app
+       never sees it. -->
+  <script>
+  (function () {
+    var lastError = null;
+
+    window.addEventListener('error', function (e) {
+      lastError = (e && (e.message || (e.error && e.error.message))) || 'Script error';
+      if (e && e.filename) lastError += '\n' + e.filename + ':' + (e.lineno || 0);
+    }, true);
+
+    window.addEventListener('unhandledrejection', function (e) {
+      var r = e && e.reason;
+      lastError = 'Unhandled rejection: ' + ((r && (r.message || r)) || 'unknown');
+    });
+
+    function report() {
+      var root = document.getElementById('root');
+      if (!root || root.children.length > 0) return;
+      root.innerHTML =
+        '<div style="font:14px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;' +
+        'padding:24px;max-width:640px;margin:0 auto;color:#1F1F1F">' +
+        '<div style="font-weight:600;font-size:16px;margin-bottom:8px">This widget failed to start</div>' +
+        '<div style="color:#555;margin-bottom:16px">Screenshot this and send it over — it says what broke.</div>' +
+        '<pre style="white-space:pre-wrap;word-break:break-word;background:#F5F5F5;' +
+        'border-radius:8px;padding:12px;font-size:12px;color:#333;margin:0">' +
+        (lastError ? esc(lastError) : 'No error was reported — the script may not have loaded at all.') +
+        '\n\n' + esc(navigator.userAgent) +
+        '\n' + esc(location.href) +
+        '</pre></div>';
+    }
+
+    function esc(t) {
+      return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Long enough that a slow phone connection is never mistaken for a failure.
+    setTimeout(report, 8000);
+  })();
+  </script>
   <script type="module" src="/src/main.tsx"></script>
 
   <script>
