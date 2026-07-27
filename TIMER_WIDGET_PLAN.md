@@ -12,6 +12,100 @@
 
 ---
 
+## RESUME HERE — state as of 27 Jul 2026
+
+### Where it is
+
+Live and working: **desktop browsers, Notion on the web, and the Notion phone
+app**. Unlisted — the only link in the product is `/lab`.
+
+- Widget: `https://peachyplanner.vercel.app/embed/timer`
+- Config + link builder: `https://peachyplanner.vercel.app/lab`
+- Also reachable from the dev panel → **Lab**
+
+### What works
+
+Countdown from a wall-clock deadline · duration presets 5/10/15/20 · three
+synthesised bowls plus Silent, previewable by tap · opening strike (on by
+default) · optional interval bells · pause / reset · transparent mode (`?nobg`) ·
+CSS-generated background with a breathing field, or a photo by URL with
+adjustable frost · progress bar while running.
+
+### Unresolved — pick this up first
+
+**The bell does not sound in the Notion phone app.** Not diagnosed. Ranked
+suspects:
+
+1. **iPhone ringer switch.** Web Audio on iOS obeys the hardware mute. Most
+   likely, and there is no reliable pure-web workaround. **Check this first:**
+   ringer ON, volume up, then tap a bowl chip — that is a direct gesture, so if
+   *that* is silent the problem is the device or the webview, not our timing.
+2. **The app's webview may block audio outright.** Compare: open the same URL in
+   Safari on the phone. Sounds there but not in the app → the app blocks it.
+3. Already fixed and probably not it: `ring()` used to schedule against a
+   suspended context's clock; it now waits for `resume()` to resolve.
+
+**Independent of the sound: the finished state is nearly invisible.** It changes
+one word to `complete` and the button to `Again`. No bloom, no pulse. Everything
+currently rests on a bell that may never sound. This is worth fixing on its own
+merits and works on every device.
+
+### Not built
+
+- **Studio wiring.** Users cannot create a timer. Checklist in §8 — 9 files.
+- **`breathe` style is parked** (owner's call). Works by URL, offered nowhere.
+- **File upload for backgrounds.** URL only. Settings travel in the URL, so a
+  base64 image would make the embed link unusable, and there is no storage layer.
+  Real uploads mean Supabase Storage and only work for signed-in users.
+- **Other widgets on iOS.** Calendar, clock and board still scale through the SVG
+  `foreignObject` wrapper, which WebKit does not honour — they are presumably
+  cropped in the phone app exactly as the timer was. Same fix applies; it touches
+  every published embed, so it wants its own pass.
+
+### Where things live
+
+```
+src/presentation/components/widgets/timer/
+├── styles/TimerCommonStyles.ts   ← ALL layout: spacing, radii, glass rim
+├── backgroundPresets.ts          ← colours, gradient, grain
+├── useBell.ts                    ← three bowls, synthesis
+├── useBreathPhase.ts             ← breathing of the field
+└── TimerShell.tsx                ← markup and wiring
+
+src/presentation/hooks/useTimerEngine.ts   ← the countdown itself
+src/presentation/pages/TimerEmbedPage.tsx  ← /embed/timer
+src/presentation/pages/LabPage.tsx         ← /lab
+src/domain/value-objects/TimerSettings.ts  ← settings and defaults
+```
+
+To change how it looks, one file: **`styles/TimerCommonStyles.ts`**.
+
+### Traps that already cost time — don't re-learn them
+
+1. **No backticks inside styled-components template comments.** A backtick in a
+   CSS comment terminates the literal and the file stops compiling. Cost two
+   separate debugging rounds in one day.
+2. **`frame-ancestors *` blocks the Notion phone app.** See CLAUDE.md. Never
+   re-add it.
+3. **Gradient positions are in `BreathLayer` coordinates**, and that layer is
+   inset -16%. The visible card spans roughly 12%..88% of it, so a bloom written
+   at `0% 0%` renders off-screen. The first background looked flat for this
+   reason alone.
+4. **The URL codec silently corrupts values.** Numeric-looking strings become
+   numbers (hence the pattern is named `relax`, not `478`), and single-letter
+   values are remapped through a table shared by every field. New string values
+   must be 2+ characters. Covered by tests.
+5. **`max-width` on the card must equal `TimerSettings.embedWidth`.** When they
+   disagreed the card sat top-left inside its own reference box and read as
+   off-centre on a phone.
+
+### Health
+
+`npm run check` clean — lint, typecheck, 63 tests. Branch `design-experiment`,
+pushed. Production deploy current.
+
+---
+
 ## 0. Why this one is different
 
 Every existing widget is a **pure render of settings**. Calendar draws a month,

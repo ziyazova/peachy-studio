@@ -225,6 +225,91 @@ The way to allow framing is to not send the header at all and let
 `Content-Security-Policy: frame-ancestors *` do the job. It was set to `ALLOWALL`
 on `/embed/*` and has been removed.
 
+## Embeds in the Notion MOBILE app — hard-won rules
+
+Jul 2026: every widget rendered fine in browsers and in Notion on the web, and
+was a blank frame in the Notion phone app. Four separate causes were eliminated
+before the real one; all of the following are now load-bearing.
+
+### 1. NEVER send `Content-Security-Policy: frame-ancestors *`
+
+**This was the cause of the blank frames.** It was added to *permit* framing and
+did the opposite. Per the CSP grammar the `*` source expression matches only
+URLs whose scheme is http/https — the Notion mobile app hosts its document in a
+webview whose origin is not one of those, so the ancestor never matched, the
+policy denied, and the document was never loaded.
+
+Sending **no** CSP is strictly more permissive than `frame-ancestors *`. If the
+intent is "anyone may frame this", express it by sending nothing.
+
+Diagnosis method worth repeating: diff response headers against a site that DOES
+render in the same app. `aliiaziiazova.vercel.app` worked with identical hosting,
+the same `.vercel.app` domain and the same `Content-Disposition`; the CSP was the
+only difference.
+
+### 2. `X-Frame-Options: ALLOWALL` is not a valid value
+
+The header defines only `DENY` and `SAMEORIGIN`. There is no allow-everyone
+token, and behaviour on an unrecognised value is implementation-defined. Removed.
+(Verified it was NOT the mobile cause — current WebKit ignores it — but it was a
+portability hazard.)
+
+### 3. Vercel's `Content-Disposition: inline; filename="index.html"`
+
+Vercel adds this when serving the SPA rewrite target. A filename marks the
+response as a *file*; overridden to a bare `inline`. (Also verified not to be the
+mobile cause, but harmless and more correct.)
+
+### 4. Old deployment aliases get locked behind Vercel SSO
+
+`1calendar-widget-aliias-projects-37358320.vercel.app` — the long, org-scoped
+form — now answers `302` to a login redirect with `X-Frame-Options: DENY`. Any
+embed still pointing at it is a permanently blank frame for everyone **except**
+whoever is logged into Vercel in that browser, which makes it look fine to the
+owner and broken to customers. The short `1calendar-widget.vercel.app` is fine.
+**When the production alias moves, existing embeds must be re-pasted.**
+
+### 5. WebKit does not scale HTML inside an SVG `foreignObject`
+
+`EmbedScaleWrapper` scales by wrapping the widget in an SVG viewBox around a
+`foreignObject`. On iOS the transform is not reliably applied to the HTML, so the
+widget renders at natural size and the frame crops it — square edges, rounded
+corners gone. The timer was moved off it to plain CSS fitting:
+
+```css
+width: min(100%, calc(100vh * 2 / 3));
+aspect-ratio: 2 / 3;
+```
+
+Inside an iframe `100vh` is the frame's own height, so this fits on whichever
+axis binds, with no measuring and nothing for engines to disagree about. It works
+because the widget is sized entirely in `cqw` and is therefore
+resolution-independent. **Calendar, clock and board still use the SVG wrapper and
+are presumably still cropped on iOS — unfixed.**
+
+### 6. WebKit won't clip a COMPOSITED child to a rounded `overflow: hidden`
+
+The timer's breathing background is composited on purpose (`will-change:
+transform`), so on iOS it painted over the card's rounded corners. Fix: mask the
+clipping element, which forces rasterisation with the rounding applied.
+
+```css
+-webkit-mask-image: -webkit-radial-gradient(white, black);
+mask-image: radial-gradient(white, black);
+```
+
+### 7. There is now a boot watchdog — read it before debugging a white screen
+
+`index.html` carries a plain-ES5 watchdog **outside** the bundle, plus a static
+no-JS fallback inside `#root`. `Logger` is dev-only and stripped from production,
+so before this a failure before React mounted produced a silent white page.
+
+Diagnostic value: if the watchdog text appears, a script broke. If the static
+card appears, scripts never ran. If the frame is blank, the document never
+loaded at all — look at headers, not code.
+
+---
+
 ## Vendor abstraction rule (Supabase, Polar)
 
 Decision (Apr 18, 2026): **stay on Supabase + Polar for the foreseeable
