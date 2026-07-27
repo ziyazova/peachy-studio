@@ -200,14 +200,30 @@ Files: `src/infrastructure/services/PublicWidgetService.ts`, `src/presentation/h
 **Critical:** Embed URLs must use the **production domain**, not `window.location.origin`.
 
 - Controlled by `VITE_EMBED_BASE_URL` env var (set in `.env.production`)
-- Current production domain: `https://1calendar-widget-aliias-projects-37358320.vercel.app`
+- Current production domain: `https://peachyplanner.vercel.app`
+- ⚠️ **Old domain `1calendar-widget-aliias-projects-37358320.vercel.app` is now
+  behind Vercel SSO** — it answers `302` to a login redirect and
+  `X-Frame-Options: DENY`, so any embed still pointing there is a permanently
+  blank frame. It still *looks* fine when opened directly in a browser tab,
+  because a top-level navigation sends the Vercel session cookie; inside an
+  iframe there is no session, so it is blocked. Embeds created before the
+  domain switch must be re-pasted with the new host.
 - Falls back to `window.location.origin` if env var is not set (for local dev)
 - Code: `WidgetRepositoryImpl.saveToUrl()` reads `import.meta.env.VITE_EMBED_BASE_URL`
 
 **Why this matters — Vercel + Notion iframe issue:**
 Vercel protects non-production deployments (preview, branch) with authentication by default. This returns `401 + X-Frame-Options: DENY`, which completely blocks iframe embedding. Notion/Iframely caches this rejection server-side, so even after turning off Vercel protection, the embed stays broken for that domain. Using the stable production domain avoids this entirely.
 
-**If the production domain changes:** update `VITE_EMBED_BASE_URL` in `.env.production` and redeploy.
+**If the production domain changes:** update `VITE_EMBED_BASE_URL` in
+`.env.production` and redeploy — **and re-paste every existing embed**, because
+already-published links keep pointing at the old host, which Vercel will start
+protecting the moment it stops being the production alias.
+
+**Never send `X-Frame-Options: ALLOWALL`.** It is not a valid value — the header
+only defines `DENY` and `SAMEORIGIN`, and there is no "allow everyone" token.
+The way to allow framing is to not send the header at all and let
+`Content-Security-Policy: frame-ancestors *` do the job. It was set to `ALLOWALL`
+on `/embed/*` and has been removed.
 
 ## Vendor abstraction rule (Supabase, Polar)
 
