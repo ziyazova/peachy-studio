@@ -37,22 +37,20 @@ export const TimerSurface = styled.div<{
   background: ${({ $transparent, $plainBg }) => ($transparent ? 'transparent' : $plainBg)};
   border: ${({ $showBorder, $borderColor }) =>
     ($showBorder ? `1px solid ${$borderColor}` : 'none')};
-  /* Glass rim.
+  /* Glass rim, and ONLY the rim — no drop shadow.
    *
    * Built from inset shadows rather than a border property, so it stays
-   * independent of the owner's showBorder setting — and because a border sits
+   * independent of the owner's showBorder setting, and because a border sits
    * outside the radius curve while an inset shadow follows it exactly.
    *
-   * Layered in the order light actually behaves on a glass edge: a bright top
-   * lip where light catches, a faint rim all the way round, a dark bottom lip
-   * where it falls away, then two outer shadows — one tight for contact, one
-   * wide and soft for lift. */
+   * Layered the way light behaves on a glass edge: a bright top lip where light
+   * catches, a faint rim all the way round, a dark bottom lip where it falls
+   * away. The outer drop shadows were removed deliberately — inside a Notion
+   * page the card should sit flat on the document, not hover above it. */
   box-shadow: ${({ $transparent }) => ($transparent ? 'none' : [
     'inset 0 1.2px 0 rgba(255, 255, 255, 0.26)',
     'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
     'inset 0 -1.2px 0 rgba(0, 0, 0, 0.22)',
-    '0 3px 10px rgba(8, 20, 10, 0.22)',
-    '0 20px 52px rgba(8, 20, 10, 0.34)',
   ].join(', '))};
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   user-select: none;

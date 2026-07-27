@@ -117,6 +117,50 @@ import {
  * See App.tsx.
  */
 
+/* ── Unreleased work ──────────────────────────────────────────────────────
+   Widgets that exist in the build but are deliberately not surfaced anywhere
+   users can reach them. Listed here because /dev is the internal page — this
+   is the ONLY place in the product that links to them. */
+
+const UnreleasedCard = styled.div`
+  margin: 0 auto ${({ theme }) => theme.spacing[8]};
+  max-width: 900px;
+  padding: ${({ theme }) => theme.spacing[6]};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  background: ${({ theme }) => theme.colors.background.surfaceAlt};
+  border: 1px dashed ${({ theme }) => theme.colors.border.medium};
+`;
+
+const UnreleasedTitle = styled.h3`
+  margin: 0 0 ${({ theme }) => theme.spacing[2]};
+  font-size: ${({ theme }) => theme.typography.sizes.lg};
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const UnreleasedNote = styled.p`
+  margin: 0 0 ${({ theme }) => theme.spacing[4]};
+  font-size: ${({ theme }) => theme.typography.sizes.sm};
+  line-height: 1.5;
+  color: ${({ theme }) => theme.colors.text.body};
+`;
+
+const UnreleasedLinks = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[2]};
+`;
+
+const UnreleasedLink = styled.a`
+  font-family: ${({ theme }) => theme.typography.fonts.mono};
+  font-size: ${({ theme }) => theme.typography.sizes.sm};
+  color: ${({ theme }) => theme.colors.brand.indigoDark};
+  text-decoration: none;
+  word-break: break-all;
+
+  &:hover { text-decoration: underline; }
+`;
+
 const ALL_VARIANTS: ButtonVariant[] = Object.keys(buttonVariantTokens) as ButtonVariant[];
 const ALL_SIZES: ButtonSize[] = Object.keys(buttonSizeTokens) as ButtonSize[];
 
@@ -416,6 +460,33 @@ export const DesignSystemPage: React.FC = () => {
         <AnchorLink href="#overlays">05 Overlays</AnchorLink>
         <AnchorLink href="#chrome">06 Site chrome</AnchorLink>
       </AnchorBar>
+
+      {/* Unreleased: reachable by URL, linked from nowhere else in the product. */}
+      <UnreleasedCard>
+        <UnreleasedTitle>Unreleased — Meditation timer</UnreleasedTitle>
+        <UnreleasedNote>
+          Built and deployed, but deliberately not surfaced: it has no Studio wiring,
+          no gallery card, and nothing links to it except this page. Embed routes
+          cannot be auth-gated — Notion loads them anonymously inside an iframe —
+          so &ldquo;hidden&rdquo; here means <strong>unlisted</strong>, not private.
+          Anyone holding a URL can open it. Remove this card when the timer ships.
+        </UnreleasedNote>
+        <UnreleasedLinks>
+          <UnreleasedLink href="/embed/timer" target="_blank" rel="noreferrer">
+            /embed/timer — default, 10 min
+          </UnreleasedLink>
+          <UnreleasedLink href="/embed/timer?nobg" target="_blank" rel="noreferrer">
+            /embed/timer?nobg — transparent background
+          </UnreleasedLink>
+          <UnreleasedLink
+            href="/embed/timer?c=eyJfIjoibSIsInQiOiJiZWxsIiwibWQiOjIwLCJtaSI6NX0"
+            target="_blank"
+            rel="noreferrer"
+          >
+            /embed/timer?c=… — 20 min, interval bell every 5
+          </UnreleasedLink>
+        </UnreleasedLinks>
+      </UnreleasedCard>
 
       <MegaTitle id="foundations" data-num="01 — Foundations">Tokens &amp; primitives</MegaTitle>
 

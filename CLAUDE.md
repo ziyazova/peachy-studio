@@ -75,6 +75,7 @@ src/
 | `/studio` | StudioPage | Widget editor with live preview + customization |
 | `/embed/calendar` | CalendarEmbedPage | Embeddable calendar (Notion iframe) |
 | `/embed/clock` | ClockEmbedPage | Embeddable clock (Notion iframe) |
+| `/embed/timer` | TimerEmbedPage | Embeddable meditation timer — **unlisted, see below** |
 | `*` | LandingPage | Catch-all |
 
 ## Widgets
@@ -88,6 +89,37 @@ src/
 ### Clock
 - **Modern Digital** (`modern`) — Digital time, 12h/24h, seconds toggle, date
 - **Analog Classic** (`analog-classic`) — Circular face, hour marks, animated hands
+
+### Timer — UNRELEASED (unlisted)
+
+Meditation countdown. Built, tested and deployed to production, but **deliberately
+not surfaced to users**: no Studio wiring, no gallery card, no style picker entry.
+The only link in the entire product is the "Unreleased" card at the top of `/dev`.
+
+- **Bell** (`bell`) — the shipping style. Countdown, duration presets, three
+  synthesised bowls (Bowl / Temple / Crystal), optional interval bells.
+- **Breathe** (`breathe`) — **parked.** Guided breathing pacer. Works if a URL
+  asks for it; not offered anywhere and not being developed.
+
+> ⚠️ **"Hidden" here means _unlisted_, not private.** Embed routes cannot be
+> auth-gated: Notion loads them anonymously inside a sandboxed iframe with no
+> session, so any gate would break every embed including the owner's. Anyone
+> holding a URL can open the timer. This is a deliberate, temporary state while
+> the design settles — when it ships, wire it into Studio (checklist in
+> `TIMER_WIDGET_PLAN.md` §8) and delete the `/dev` card.
+
+Key implementation notes (full detail in `TIMER_WIDGET_PLAN.md`):
+- **First interactive widget.** Runtime state (idle → running → paused →
+  finished) lives in `useTimerEngine` and never enters `TimerSettings` or the
+  URL — two viewers of the same Notion page run independent sessions.
+- **Countdown is deadline-derived, never decremented.** Background tabs throttle
+  timers to ~1Hz; a decrementing counter finishes a 10-minute sit at ~14 real
+  minutes. The tick only triggers a repaint.
+- **Bells are synthesised** with the Web Audio API — no audio files, no licence,
+  nothing to fetch into the iframe. The context is opened from the Start click,
+  because the end bell fires from a timer callback and a context created there
+  would stay `suspended`.
+- **Background is CSS-generated** (gradient stack + SVG `feTurbulence` grain).
 
 ### Widget Settings
 - Shared: `primaryColor`, `backgroundColor`, `accentColor`, `borderRadius`, `showBorder`, `embedWidth`, `embedHeight`, `theme`

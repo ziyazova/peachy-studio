@@ -42,7 +42,7 @@ export const TIMER_BACKGROUNDS: Record<TimerBgPreset, TimerBackground> = {
      actual light source. */
   sage: {
     label: 'Forest',
-    core: '#2A4B2C',
+    core: '#2E5230',
     ink: '#FFFFFF',
     material: '#FFFFFF',
     onMaterial: '#25431F',
@@ -55,8 +55,8 @@ export const TIMER_BACKGROUNDS: Record<TimerBgPreset, TimerBackground> = {
          dark smoked surface that happens to be lit, not as a gradient. */
       'radial-gradient(ellipse 52% 38% at 8% 5%, rgba(208, 224, 172, 0.52) 0%, rgba(166, 192, 130, 0.28) 34%, rgba(112, 146, 92, 0.1) 58%, rgba(80, 112, 68, 0) 82%)',
       /* Weight in the opposite corner so the light reads as directional. */
-      'radial-gradient(ellipse 72% 56% at 90% 94%, rgba(8, 20, 11, 0.55) 0%, rgba(12, 26, 15, 0.24) 44%, rgba(16, 32, 19, 0) 76%)',
-      'linear-gradient(152deg, #345C34 0%, #2A4B2C 38%, #213C24 70%, #172D1B 100%)',
+      'radial-gradient(ellipse 72% 56% at 90% 94%, rgba(8, 20, 11, 0.48) 0%, rgba(12, 26, 15, 0.2) 44%, rgba(16, 32, 19, 0) 76%)',
+      'linear-gradient(152deg, #396539 0%, #2E5230 38%, #244228 70%, #19321E 100%)',
     ].join(', '),
   },
   plain: {
