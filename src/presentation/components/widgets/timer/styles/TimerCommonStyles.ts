@@ -18,15 +18,17 @@ export const TimerSurface = styled.div<{
   $borderColor: string;
   $transparent: boolean;
   $plainBg: string;
+  $fill?: boolean;
 }>`
   position: relative;
   width: 100%;
-  /* MUST equal TimerSettings.embedWidth. With aspect-ratio 2/3 that makes the
-     card exactly 360x540 — the same box EmbedScaleWrapper reserves. When the two
-     disagreed (340 wide vs a 360 reference) the card sat top-left inside its own
-     reference box and read as visibly off-centre on a phone. */
-  max-width: 360px;
-  min-width: 200px;
+  /* Natural size 360x540, matching TimerSettings.embedWidth. In fill mode the
+     embed page sizes the card instead: everything inside is measured in cqw, so
+     the card is resolution-independent and looks right at any size — which is
+     what lets the embed fit it with plain CSS and no scaling machinery.
+     NB: no backticks in these comments — this is a template literal. */
+  max-width: ${({ $fill }) => ($fill ? 'none' : '360px')};
+  min-width: ${({ $fill }) => ($fill ? '0' : '200px')};
   /* Tall, phone-ish. The stacked segment rows need the vertical room, and the
      reference widgets all read as a long card. */
   aspect-ratio: 2 / 3;

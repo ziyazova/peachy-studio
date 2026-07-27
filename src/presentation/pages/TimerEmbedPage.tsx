@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { Logger } from '../../infrastructure/services/Logger';
 import { TimerWidget } from '../components/widgets/TimerWidget';
-import { EmbedScaleWrapper } from '../components/embed/EmbedScaleWrapper';
 import { WidgetUnavailable } from '../components/embed/WidgetUnavailable';
 import { Widget } from '../../domain/entities/Widget';
 import { TimerSettings } from '../../domain/value-objects/TimerSettings';
@@ -33,6 +32,27 @@ const GlobalEmbedStyles = createGlobalStyle<{ $bgColor: string }>`
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
   }
+`;
+
+/**
+ * Fits the card with plain CSS instead of the shared EmbedScaleWrapper.
+ *
+ * That wrapper scales via an SVG viewBox around a foreignObject. WebKit does not
+ * reliably apply the viewBox transform to HTML inside foreignObject, so on iOS
+ * the card rendered at its natural 360x540 and the frame simply cut it off —
+ * square edges, rounded corners gone. Reported from the Notion mobile app.
+ *
+ * No scaling is needed here anyway: the card is measured entirely in cqw, so it
+ * is resolution-independent. Sizing the box is enough, and `aspect-ratio` plus a
+ * `min()` guarantees it fits whichever dimension is the tighter constraint.
+ */
+const FitBox = styled.div`
+  /* Width is whichever limit bites first: the frame's width, or the width the
+     frame's HEIGHT allows at a 2:3 ratio. Inside an iframe 100vh is the frame's
+     own height, so this fits both ways with no measuring. */
+  width: min(100%, calc(100vh * 2 / 3));
+  aspect-ratio: 2 / 3;
+  display: flex;
 `;
 
 const EmbedContainer = styled.div`
@@ -129,9 +149,7 @@ export const TimerEmbedPage: React.FC = () => {
       <EmbedController>
         <GlobalEmbedStyles $bgColor={containerBg} />
         <EmbedContainer>
-          <EmbedScaleWrapper>
-            <LoadingState>Loading timer...</LoadingState>
-          </EmbedScaleWrapper>
+          <LoadingState>Loading timer...</LoadingState>
         </EmbedContainer>
       </EmbedController>
     );
@@ -142,12 +160,7 @@ export const TimerEmbedPage: React.FC = () => {
       <EmbedController>
         <GlobalEmbedStyles $bgColor={containerBg} />
         <EmbedContainer>
-          <EmbedScaleWrapper
-            refWidth={urlSettings.embedWidth}
-            refHeight={urlSettings.embedHeight}
-          >
-            <WidgetUnavailable />
-          </EmbedScaleWrapper>
+          <WidgetUnavailable />
         </EmbedContainer>
       </EmbedController>
     );
@@ -158,12 +171,10 @@ export const TimerEmbedPage: React.FC = () => {
       <EmbedController>
         <GlobalEmbedStyles $bgColor={containerBg} />
         <EmbedContainer>
-          <EmbedScaleWrapper>
-            <ErrorState>
-              <h3>Error</h3>
-              <p>{error || 'Failed to load timer widget'}</p>
-            </ErrorState>
-          </EmbedScaleWrapper>
+          <ErrorState>
+            <h3>Error</h3>
+            <p>{error || 'Failed to load timer widget'}</p>
+          </ErrorState>
         </EmbedContainer>
       </EmbedController>
     );
@@ -173,12 +184,9 @@ export const TimerEmbedPage: React.FC = () => {
     <EmbedController>
       <GlobalEmbedStyles $bgColor={containerBg} />
       <EmbedContainer>
-        <EmbedScaleWrapper
-          refWidth={effectiveSettings.embedWidth}
-          refHeight={effectiveSettings.embedHeight}
-        >
-          <TimerWidget widget={widget} transparent={isTransparent} />
-        </EmbedScaleWrapper>
+        <FitBox>
+          <TimerWidget widget={widget} transparent={isTransparent} fill />
+        </FitBox>
       </EmbedContainer>
     </EmbedController>
   );

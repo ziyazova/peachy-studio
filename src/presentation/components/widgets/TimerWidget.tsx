@@ -13,16 +13,17 @@ import { BreatheTimer } from './timer/styles/BreatheTimer';
 interface TimerWidgetProps {
   widget: Widget;
   transparent?: boolean;
+  fill?: boolean;
 }
 
-export const TimerWidget: React.FC<TimerWidgetProps> = ({ widget, transparent }) => {
+export const TimerWidget: React.FC<TimerWidgetProps> = ({ widget, transparent, fill }) => {
   const settings = widget.settings as TimerSettings;
 
   switch (settings.style) {
     case 'breathe':
-      return <BreatheTimer settings={settings} transparent={transparent} />;
+      return <BreatheTimer settings={settings} transparent={transparent} fill={fill} />;
     case 'bell':
     default:
-      return <BellTimer settings={settings} transparent={transparent} />;
+      return <BellTimer settings={settings} transparent={transparent} fill={fill} />;
   }
 };

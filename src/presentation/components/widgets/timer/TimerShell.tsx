@@ -42,9 +42,11 @@ interface TimerShellProps {
   /** `breathe` follows a pattern and names each phase; `bell` just keeps a calm ambience. */
   guided: boolean;
   transparent?: boolean;
+  /** Embed pages size the card themselves; the studio preview uses the natural size. */
+  fill?: boolean;
 }
 
-export const TimerShell: React.FC<TimerShellProps> = ({ settings, guided, transparent = false }) => {
+export const TimerShell: React.FC<TimerShellProps> = ({ settings, guided, transparent = false, fill = false }) => {
   const bg = getTimerBackground(settings.bgPreset);
   const isPlain = settings.bgPreset === 'plain' || transparent;
 
@@ -124,6 +126,7 @@ export const TimerShell: React.FC<TimerShellProps> = ({ settings, guided, transp
       $borderColor={`${material}3D`}
       $transparent={transparent}
       $plainBg={settings.backgroundColor}
+      $fill={fill}
     >
       {usePhoto ? (
         <>
