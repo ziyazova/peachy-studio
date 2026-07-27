@@ -88,6 +88,49 @@ function getAudioCtor(): AudioCtor | null {
     || null;
 }
 
+/**
+ * Builds and schedules one strike.
+ *
+ * Module-level rather than inline so it can be called both immediately and from
+ * a `resume()` continuation without rebuilding the graph in two places.
+ */
+function strike(ctx: AudioContext, sound: TimerEndSound, intensity: number): void {
+  if (sound === 'none') return;
+  const voice = BELL_VOICES[sound];
+  if (!voice) return;
+
+  try {
+    const now = ctx.currentTime;
+
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, now);
+    master.gain.exponentialRampToValueAtTime(0.34 * intensity, now + 0.010);
+    master.gain.exponentialRampToValueAtTime(0.0001, now + voice.decay);
+    master.connect(ctx.destination);
+
+    voice.partials.forEach(({ ratio, gain, detune }) => {
+      // Higher partials die first, like a real bell.
+      const partialDecay = voice.decay / Math.max(1, ratio * 0.55);
+
+      const voices = detune ? [-detune / 2, detune / 2] : [0];
+      voices.forEach(offset => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(voice.freq * ratio + offset, now);
+        g.gain.setValueAtTime(gain / voices.length, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + partialDecay);
+        osc.connect(g);
+        g.connect(master);
+        osc.start(now);
+        osc.stop(now + partialDecay + 0.1);
+      });
+    });
+  } catch (err) {
+    Logger.warn('TimerBell', 'Bell failed, continuing silently', err);
+  }
+}
+
 export function useBell() {
   const ctxRef = useRef<AudioContext | null>(null);
 
@@ -99,7 +142,7 @@ export function useBell() {
   /**
    * Open (and unlock) the audio context.
    *
-   * MUST be called from a real user gesture — the Start click, or tapping a bell
+   * MUST be called from a real user gesture — the Start click, or tapping a bowl
    * to preview it. The end-of-session bell fires from a timer callback, which is
    * NOT a gesture, so a context created lazily at ring time would stay
    * `suspended` and the very bell this feature exists for would be silent.
@@ -125,44 +168,23 @@ export function useBell() {
   const ring = useCallback((sound: TimerEndSound, intensity: number = 1) => {
     if (sound === 'none') return;
 
-    try {
-      const ctx = ctxRef.current;
-      // Not primed (no gesture yet, or audio unavailable) — stay silent.
-      if (!ctx) return;
-      if (ctx.state === 'suspended') ctx.resume().catch(() => { /* best effort */ });
+    const ctx = ctxRef.current;
+    // Not primed (no gesture yet, or audio unavailable) — stay silent.
+    if (!ctx) return;
 
-      const voice = BELL_VOICES[sound];
-      if (!voice) return;
-
-      const now = ctx.currentTime;
-
-      const master = ctx.createGain();
-      master.gain.setValueAtTime(0.0001, now);
-      master.gain.exponentialRampToValueAtTime(0.34 * intensity, now + 0.010);
-      master.gain.exponentialRampToValueAtTime(0.0001, now + voice.decay);
-      master.connect(ctx.destination);
-
-      voice.partials.forEach(({ ratio, gain, detune }) => {
-        // Higher partials die first, like a real bell.
-        const partialDecay = voice.decay / Math.max(1, ratio * 0.55);
-
-        const voices = detune ? [-detune / 2, detune / 2] : [0];
-        voices.forEach(offset => {
-          const osc = ctx.createOscillator();
-          const g = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(voice.freq * ratio + offset, now);
-          g.gain.setValueAtTime(gain / voices.length, now);
-          g.gain.exponentialRampToValueAtTime(0.0001, now + partialDecay);
-          osc.connect(g);
-          g.connect(master);
-          osc.start(now);
-          osc.stop(now + partialDecay + 0.1);
-        });
-      });
-    } catch (err) {
-      Logger.warn('TimerBell', 'Bell failed, continuing silently', err);
+    /* A suspended context does not advance currentTime, so scheduling against it
+       and hoping resume() lands in time drops the strike silently. iOS suspends
+       aggressively — any backgrounded tab — and the end-of-session bell is
+       precisely the one that fires after a long quiet stretch. So wait for the
+       resume to actually resolve before scheduling anything. */
+    if (ctx.state === 'suspended') {
+      ctx.resume()
+        .then(() => strike(ctx, sound, intensity))
+        .catch(err => Logger.warn('TimerBell', 'Could not resume audio context', err));
+      return;
     }
+
+    strike(ctx, sound, intensity);
   }, []);
 
   /**
