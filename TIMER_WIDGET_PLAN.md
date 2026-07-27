@@ -6,9 +6,9 @@
 >
 > Status: **BUILT — `bell` style shipping, `breathe` parked.** On `design-experiment`.
 >
-> What exists: domain + codec + engine + audio + the widget + `/embed/timer`.
-> What does NOT exist yet: any Studio wiring. The timer cannot be created from
-> the UI — only via a direct `/embed/timer?c=…` URL. See §8 for the checklist.
+> What exists: domain + codec + engine + audio + the widget + `/embed/timer`,
+> plus an internal `/lab` page that configures it and emits the embed link.
+> What does NOT exist yet: any Studio wiring. Users cannot create one. See §8.
 
 ---
 

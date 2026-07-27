@@ -20,6 +20,7 @@ import { ClaudeFeedback } from './presentation/components/dev/ClaudeFeedback';
 import { BranchSwitcher } from './presentation/components/dev/BranchSwitcher';
 import { DevPanelsToggle } from './presentation/components/dev/DevPanelsToggle';
 import { DesignSystemPage } from './presentation/pages/DesignSystemPage';
+import { LabPage } from './presentation/pages/LabPage';
 import { PrivacyPage } from './presentation/pages/PrivacyPage';
 import { TermsPage } from './presentation/pages/TermsPage';
 import { RefundPage } from './presentation/pages/RefundPage';
@@ -133,6 +134,8 @@ function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/checkout" element={<CheckoutPage />} />
                   <Route path="/dev" element={<DesignSystemPage />} />
+                  {/* Internal: unreleased work. Unlinked from site chrome on purpose. */}
+                  <Route path="/lab" element={<LabPage />} />
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/refund" element={<RefundPage />} />

@@ -76,6 +76,7 @@ src/
 | `/embed/calendar` | CalendarEmbedPage | Embeddable calendar (Notion iframe) |
 | `/embed/clock` | ClockEmbedPage | Embeddable clock (Notion iframe) |
 | `/embed/timer` | TimerEmbedPage | Embeddable meditation timer — **unlisted, see below** |
+| `/lab` | LabPage | **Internal.** Unreleased work, unlinked from site chrome |
 | `*` | LandingPage | Catch-all |
 
 ## Widgets
@@ -94,7 +95,12 @@ src/
 
 Meditation countdown. Built, tested and deployed to production, but **deliberately
 not surfaced to users**: no Studio wiring, no gallery card, no style picker entry.
-The only link in the entire product is the "Unreleased" card at the top of `/dev`.
+The only link in the entire product is on **`/lab`** — an internal page that is
+itself unlinked from the site chrome. `/lab` gives each unreleased widget a live
+preview plus real controls, and builds the embed URL through the same repository
+the Studio uses, so the link is byte-identical to a customer's. Deliberately not
+part of `/dev`: that page documents the shipped design system, and mixing
+"what we have" with "what isn't out" makes both harder to trust.
 
 - **Bell** (`bell`) — the shipping style. Countdown, duration presets, three
   synthesised bowls (Bowl / Temple / Crystal), optional interval bells.
@@ -106,7 +112,7 @@ The only link in the entire product is the "Unreleased" card at the top of `/dev
 > session, so any gate would break every embed including the owner's. Anyone
 > holding a URL can open the timer. This is a deliberate, temporary state while
 > the design settles — when it ships, wire it into Studio (checklist in
-> `TIMER_WIDGET_PLAN.md` §8) and delete the `/dev` card.
+> `TIMER_WIDGET_PLAN.md` §8) and drop its entry from `/lab`.
 
 Key implementation notes (full detail in `TIMER_WIDGET_PLAN.md`):
 - **First interactive widget.** Runtime state (idle → running → paused →
