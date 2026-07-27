@@ -102,6 +102,14 @@ the Studio uses, so the link is byte-identical to a customer's. Deliberately not
 part of `/dev`: that page documents the shipped design system, and mixing
 "what we have" with "what isn't out" makes both harder to trust.
 
+**Background:** either the built-in CSS gradient (`bgPreset`) or a photo by URL
+(`bgImageUrl`) with adjustable frost (`glassBlur`, px). There is **no upload** —
+widget settings travel in the URL, and a base64 image would make the embed link
+unusable. Real uploads need Supabase Storage; not built. A Pinterest *pin page*
+URL can never work (it returns `text/html`); only a direct `i.pinimg.com/…`
+image link can, and only if the host permits hotlinking. A URL that fails to
+load falls back to the gradient rather than showing a blank card.
+
 - **Bell** (`bell`) — the shipping style. Countdown, duration presets, three
   synthesised bowls (Bowl / Temple / Crystal) plus **Silent**, an opening strike
   (`startBell`, on by default — the convention every meditation app follows) and

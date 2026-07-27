@@ -10,7 +10,7 @@ import { WidgetRepositoryImpl } from '../../infrastructure/repositories/WidgetRe
 import { TimerWidget } from '../components/widgets/TimerWidget';
 import { TIMER_BACKGROUNDS } from '../components/widgets/timer/backgroundPresets';
 import { BELL_CHOICES } from '../components/widgets/timer/useBell';
-import { Button, CopyButton, FilterChip, FilterRow, Switch } from '../components/shared';
+import { Button, CopyButton, FilterChip, FilterRow, Input, Switch } from '../components/shared';
 
 /**
  * Lab — unreleased work.
@@ -173,6 +173,17 @@ const UrlActions = styled.div`
 
 const INTERVAL_OPTIONS = [0, 3, 5, 10];
 
+/* A pin PAGE is text/html — an <img> can never render it. Only the CDN image
+   URL behind the pin works, which is what "Copy image address" yields. */
+const PIN_PAGE = /pinterest\.[a-z.]+\/pin\//i;
+
+const Hint = styled.p<{ $warn?: boolean }>`
+  margin: ${({ theme }) => theme.spacing[2]} 0 0;
+  font-size: ${({ theme }) => theme.typography.sizes.xs};
+  line-height: 1.5;
+  color: ${({ theme, $warn }) => ($warn ? theme.colors.danger.soft : theme.colors.text.tertiary)};
+`;
+
 export const LabPage: React.FC = () => {
   const [durationMin, setDurationMin] = useState(10);
   const [intervalBellMin, setIntervalBellMin] = useState(0);
@@ -181,10 +192,15 @@ export const LabPage: React.FC = () => {
   const [showTimeLeft, setShowTimeLeft] = useState(true);
   const [startBell, setStartBell] = useState(true);
   const [transparent, setTransparent] = useState(false);
+  const [bgImageUrl, setBgImageUrl] = useState('');
+  const [glassBlur, setGlassBlur] = useState(16);
 
   const settings = useMemo(
-    () => new TimerSettings({ durationMin, intervalBellMin, endSound, bgPreset, showTimeLeft, startBell }),
-    [durationMin, intervalBellMin, endSound, bgPreset, showTimeLeft, startBell],
+    () => new TimerSettings({
+      durationMin, intervalBellMin, endSound, bgPreset, showTimeLeft, startBell,
+      bgImageUrl: bgImageUrl.trim(), glassBlur,
+    }),
+    [durationMin, intervalBellMin, endSound, bgPreset, showTimeLeft, startBell, bgImageUrl, glassBlur],
   );
 
   /* Built through the same repository the Studio uses, so this link is
@@ -198,7 +214,7 @@ export const LabPage: React.FC = () => {
 
   /* Remounting on preset change restarts the widget's own runtime state, so the
      preview always reflects the settings rather than a half-finished session. */
-  const previewKey = `${bgPreset}-${showTimeLeft}-${transparent}-${startBell}`;
+  const previewKey = `${bgPreset}-${showTimeLeft}-${transparent}-${startBell}-${bgImageUrl}`;
 
   return (
     <Page>
@@ -280,7 +296,46 @@ export const LabPage: React.FC = () => {
             </Field>
 
             <Field>
-              <FieldLabel>Background</FieldLabel>
+              <FieldLabel>Background photo</FieldLabel>
+              <Input
+                type="url"
+                placeholder="https://… direct link to an image"
+                value={bgImageUrl}
+                onChange={e => setBgImageUrl(e.target.value)}
+              />
+              {PIN_PAGE.test(bgImageUrl) ? (
+                <Hint $warn>
+                  That is a Pinterest <em>page</em>, not an image — it returns HTML, so
+                  nothing will render. Open the pin, right-click the picture and choose
+                  &ldquo;Copy image address&rdquo; to get an <code>i.pinimg.com/…</code> link.
+                </Hint>
+              ) : (
+                <Hint>
+                  Must be a direct link to the image file. Some hosts refuse hotlinking —
+                  if nothing appears, the widget quietly falls back to the gradient.
+                </Hint>
+              )}
+            </Field>
+
+            {bgImageUrl.trim() ? (
+              <Field>
+                <FieldLabel>
+                  Frost over photo
+                  <FieldValue>{glassBlur} px</FieldValue>
+                </FieldLabel>
+                <Range
+                  type="range"
+                  min={0}
+                  max={40}
+                  step={1}
+                  value={glassBlur}
+                  onChange={e => setGlassBlur(Number(e.target.value))}
+                />
+              </Field>
+            ) : null}
+
+            <Field>
+              <FieldLabel>Gradient (used when no photo)</FieldLabel>
               <FilterRow>
                 {(Object.keys(TIMER_BACKGROUNDS) as TimerBgPreset[]).map(preset => (
                   <FilterChip

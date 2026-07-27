@@ -76,6 +76,49 @@ export const BreathLayer = styled.div<{ $field: string }>`
   }
 `;
 
+/**
+ * Photo background. Rendered as a real <img> rather than a CSS
+ * `background-image` specifically so we get `onError` — an arbitrary URL pasted
+ * by the owner can 404, expire, or be blocked by the host's hotlink rules, and
+ * the widget has to fall back to the gradient rather than show a blank card.
+ */
+export const BgImage = styled.img`
+  position: absolute;
+  inset: -16%;
+  width: 132%;
+  height: 132%;
+  object-fit: cover;
+  transform: scale(1);
+  will-change: transform;
+  z-index: 0;
+
+  @media (prefers-reduced-motion: reduce) {
+    transform: scale(1) !important;
+  }
+`;
+
+/**
+ * Frost over the photo.
+ *
+ * Two jobs, and the second is the one that matters: the blur is the look, but
+ * the scrim is what keeps white text legible over a photo we have never seen.
+ * Without it a bright image makes the clock disappear.
+ */
+export const FrostLayer = styled.div<{ $blur: number }>`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  backdrop-filter: ${({ $blur }) => ($blur > 0 ? `blur(${$blur}px) saturate(1.15)` : 'none')};
+  -webkit-backdrop-filter: ${({ $blur }) => ($blur > 0 ? `blur(${$blur}px) saturate(1.15)` : 'none')};
+  background: linear-gradient(
+    170deg,
+    rgba(16, 28, 18, 0.2) 0%,
+    rgba(14, 24, 16, 0.32) 55%,
+    rgba(10, 20, 12, 0.46) 100%
+  );
+  pointer-events: none;
+`;
+
 /** Film grain — keeps the dark field from reading as flat digital colour. */
 export const GrainLayer = styled.div`
   position: absolute;

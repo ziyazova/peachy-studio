@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pause, Play, RotateCcw } from 'lucide-react';
 import { TimerSettings, TimerEndSound } from '../../../../domain/value-objects/TimerSettings';
 import { getContrastColor } from '../../../themes/colors';
@@ -8,7 +8,9 @@ import { BELL_CHOICES, useBell } from './useBell';
 import { SEGMENT_LABEL, useBreathPhase } from './useBreathPhase';
 import {
   ActionBlock,
+  BgImage,
   BreathLayer,
+  FrostLayer,
   ClockBlock,
   ControlButton,
   ControlRow,
@@ -52,6 +54,13 @@ export const TimerShell: React.FC<TimerShellProps> = ({ settings, guided, transp
   const ink = isPlain ? getContrastColor(settings.backgroundColor) : bg.ink;
   const material = isPlain ? getContrastColor(settings.backgroundColor) : bg.material;
   const onMaterial = isPlain ? settings.backgroundColor : bg.onMaterial;
+
+  /* An owner-pasted URL can 404, expire, or be refused by the host's hotlink
+     rules. On failure we fall back to the gradient rather than show a blank
+     card. Reset on every URL change so a fixed link recovers without a reload. */
+  const [imageFailed, setImageFailed] = useState(false);
+  useEffect(() => { setImageFailed(false); }, [settings.bgImageUrl]);
+  const usePhoto = Boolean(settings.bgImageUrl) && !imageFailed && !isPlain;
 
   const bell = useBell();
 
@@ -116,7 +125,17 @@ export const TimerShell: React.FC<TimerShellProps> = ({ settings, guided, transp
       $transparent={transparent}
       $plainBg={settings.backgroundColor}
     >
-      {isPlain ? null : (
+      {usePhoto ? (
+        <>
+          <BgImage
+            ref={surfaceRef as React.RefObject<HTMLImageElement>}
+            src={settings.bgImageUrl}
+            alt=""
+            onError={() => setImageFailed(true)}
+          />
+          <FrostLayer $blur={settings.glassBlur} />
+        </>
+      ) : isPlain ? null : (
         <>
           <BreathLayer ref={surfaceRef} $field={bg.field} />
           <GrainLayer />

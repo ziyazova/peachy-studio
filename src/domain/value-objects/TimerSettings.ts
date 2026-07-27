@@ -31,6 +31,10 @@ export class TimerSettings {
   public readonly breathPattern: TimerBreathPattern;
   public readonly showTimeLeft: boolean;
   public readonly startBell: boolean;
+  /** Background photo URL. Empty = use the `bgPreset` gradient instead. */
+  public readonly bgImageUrl: string;
+  /** Frost strength over the photo, in px. 0 = no frosting. */
+  public readonly glassBlur: number;
 
   constructor(settings: Partial<TimerSettings> = {}) {
     this.primaryColor = settings.primaryColor || '#667EEA';
@@ -56,6 +60,8 @@ export class TimerSettings {
     /* On by default: every meditation app strikes once at the start, so the
        practitioner can close their eyes and go by ear alone. */
     this.startBell = settings.startBell ?? true;
+    this.bgImageUrl = settings.bgImageUrl || '';
+    this.glassBlur = settings.glassBlur ?? 16;
   }
 
   public static fromJson(json: string): TimerSettings {
@@ -85,6 +91,8 @@ export class TimerSettings {
       breathPattern: this.breathPattern,
       showTimeLeft: this.showTimeLeft,
       startBell: this.startBell,
+      bgImageUrl: this.bgImageUrl,
+      glassBlur: this.glassBlur,
     });
   }
 
@@ -106,6 +114,8 @@ export class TimerSettings {
       breathPattern: changes.breathPattern ?? this.breathPattern,
       showTimeLeft: changes.showTimeLeft ?? this.showTimeLeft,
       startBell: changes.startBell ?? this.startBell,
+      bgImageUrl: changes.bgImageUrl ?? this.bgImageUrl,
+      glassBlur: changes.glassBlur ?? this.glassBlur,
     });
   }
 }
