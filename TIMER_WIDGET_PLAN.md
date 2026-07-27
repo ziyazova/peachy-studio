@@ -102,6 +102,11 @@ closer to Time. The lift is applied by *growing the gap above the button*, since
 the action block is bottom-anchored — moving the block itself would drag the
 button down with it.
 
+**Bells.** Three strike points: the opening strike (softer, 0.7 — it marks a
+beginning rather than calling you back), optional interval strikes (0.45), and
+the closing strike (full). `Silent` is a first-class choice in the widget, not
+just in `/lab`. Resuming from pause does **not** strike — it isn't a beginning.
+
 **Progress bar** renders only while a session exists. At rest it was a dead line
 pinned at zero: decoration pretending to be information.
 
@@ -142,6 +147,7 @@ readonly fields, defaults in constructor, `fromJson` / `toJson` / `update`.
 | `endSound` | `bowl \| temple \| crystal \| none` | `bowl` | both |
 | `breathPattern` | `coherent \| box \| relax` | `coherent` | `breathe` |
 | `showTimeLeft` | boolean | `true` | both |
+| `startBell` | boolean | `true` | both |
 
 Breathing patterns:
 

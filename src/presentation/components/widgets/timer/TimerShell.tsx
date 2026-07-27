@@ -4,7 +4,7 @@ import { TimerSettings, TimerEndSound } from '../../../../domain/value-objects/T
 import { getContrastColor } from '../../../themes/colors';
 import { useTimerEngine } from '../../../hooks/useTimerEngine';
 import { getTimerBackground } from './backgroundPresets';
-import { BELL_ORDER, BELL_VOICES, useBell } from './useBell';
+import { BELL_CHOICES, useBell } from './useBell';
 import { SEGMENT_LABEL, useBreathPhase } from './useBreathPhase';
 import {
   ActionBlock,
@@ -75,11 +75,15 @@ export const TimerShell: React.FC<TimerShellProps> = ({ settings, guided, transp
   );
 
   const handleStart = useCallback(() => {
-    // The click is the user gesture that unlocks audio — see useBell.prime.
-    bell.prime();
+    /* The click is the user gesture that unlocks audio — see useBell.prime.
+       The opening strike rides on that same gesture, and is softer than the
+       closing one: it marks a beginning rather than calling you back. */
+    if (settings.startBell) bell.preview(sound, 0.7);
+    else bell.prime();
     engine.start();
-  }, [bell, engine]);
+  }, [bell, engine, settings.startBell, sound]);
 
+  /* Resuming is not a beginning — no strike, just make sure audio stays open. */
   const handleResume = useCallback(() => {
     bell.prime();
     engine.resume();
@@ -87,8 +91,11 @@ export const TimerShell: React.FC<TimerShellProps> = ({ settings, guided, transp
 
   const handlePickBell = useCallback((next: TimerEndSound) => {
     setSound(next);
-    // Tapping a bowl is a gesture, so it can both unlock audio and preview.
-    bell.preview(next);
+    /* Tapping a bowl is a gesture, so it can both unlock audio and preview.
+       Silent has nothing to play, but still prime — the viewer may switch back
+       to a bowl later, and by then the gesture is gone. */
+    if (next === 'none') bell.prime();
+    else bell.preview(next);
   }, [bell]);
 
   const label = useMemo(() => {
@@ -158,16 +165,16 @@ export const TimerShell: React.FC<TimerShellProps> = ({ settings, guided, transp
               <FieldGroup $gapTop={12} $trimPx={4}>
                 <FieldLabel $color={ink}>Bowl</FieldLabel>
                 <SegmentTrough>
-                  {BELL_ORDER.map(voice => (
+                  {BELL_CHOICES.map(({ value, label: bellLabel }) => (
                     <Segment
-                      key={voice}
+                      key={value}
                       type="button"
-                      $active={voice === sound}
+                      $active={value === sound}
                       $ink={onMaterial}
                       $material={material}
-                      onClick={() => handlePickBell(voice)}
+                      onClick={() => handlePickBell(value)}
                     >
-                      {BELL_VOICES[voice].label}
+                      {bellLabel}
                     </Segment>
                   ))}
                 </SegmentTrough>

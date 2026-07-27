@@ -9,7 +9,7 @@ import {
 import { WidgetRepositoryImpl } from '../../infrastructure/repositories/WidgetRepositoryImpl';
 import { TimerWidget } from '../components/widgets/TimerWidget';
 import { TIMER_BACKGROUNDS } from '../components/widgets/timer/backgroundPresets';
-import { BELL_ORDER, BELL_VOICES } from '../components/widgets/timer/useBell';
+import { BELL_CHOICES } from '../components/widgets/timer/useBell';
 import { Button, CopyButton, FilterChip, FilterRow, Switch } from '../components/shared';
 
 /**
@@ -179,11 +179,12 @@ export const LabPage: React.FC = () => {
   const [endSound, setEndSound] = useState<TimerEndSound>('bowl');
   const [bgPreset, setBgPreset] = useState<TimerBgPreset>('sage');
   const [showTimeLeft, setShowTimeLeft] = useState(true);
+  const [startBell, setStartBell] = useState(true);
   const [transparent, setTransparent] = useState(false);
 
   const settings = useMemo(
-    () => new TimerSettings({ durationMin, intervalBellMin, endSound, bgPreset, showTimeLeft }),
-    [durationMin, intervalBellMin, endSound, bgPreset, showTimeLeft],
+    () => new TimerSettings({ durationMin, intervalBellMin, endSound, bgPreset, showTimeLeft, startBell }),
+    [durationMin, intervalBellMin, endSound, bgPreset, showTimeLeft, startBell],
   );
 
   /* Built through the same repository the Studio uses, so this link is
@@ -197,7 +198,7 @@ export const LabPage: React.FC = () => {
 
   /* Remounting on preset change restarts the widget's own runtime state, so the
      preview always reflects the settings rather than a half-finished session. */
-  const previewKey = `${bgPreset}-${showTimeLeft}-${transparent}`;
+  const previewKey = `${bgPreset}-${showTimeLeft}-${transparent}-${startBell}`;
 
   return (
     <Page>
@@ -265,23 +266,16 @@ export const LabPage: React.FC = () => {
             <Field>
               <FieldLabel>Bowl</FieldLabel>
               <FilterRow>
-                {BELL_ORDER.map(voice => (
+                {BELL_CHOICES.map(({ value, label }) => (
                   <FilterChip
-                    key={voice}
+                    key={value}
                     type="button"
-                    $active={voice === endSound}
-                    onClick={() => setEndSound(voice)}
+                    $active={value === endSound}
+                    onClick={() => setEndSound(value)}
                   >
-                    {BELL_VOICES[voice].label}
+                    {label}
                   </FilterChip>
                 ))}
-                <FilterChip
-                  type="button"
-                  $active={endSound === 'none'}
-                  onClick={() => setEndSound('none')}
-                >
-                  Silent
-                </FilterChip>
               </FilterRow>
             </Field>
 
@@ -300,6 +294,15 @@ export const LabPage: React.FC = () => {
                 ))}
               </FilterRow>
             </Field>
+
+            <SwitchRow>
+              <span>Opening bell</span>
+              <Switch
+                checked={startBell}
+                onChange={setStartBell}
+                aria-label="Ring once when the session starts"
+              />
+            </SwitchRow>
 
             <SwitchRow>
               <span>Show remaining time</span>

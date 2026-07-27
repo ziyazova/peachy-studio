@@ -103,7 +103,9 @@ part of `/dev`: that page documents the shipped design system, and mixing
 "what we have" with "what isn't out" makes both harder to trust.
 
 - **Bell** (`bell`) — the shipping style. Countdown, duration presets, three
-  synthesised bowls (Bowl / Temple / Crystal), optional interval bells.
+  synthesised bowls (Bowl / Temple / Crystal) plus **Silent**, an opening strike
+  (`startBell`, on by default — the convention every meditation app follows) and
+  optional interval bells (`intervalBellMin`, off by default).
 - **Breathe** (`breathe`) — **parked.** Guided breathing pacer. Works if a URL
   asks for it; not offered anywhere and not being developed.
 

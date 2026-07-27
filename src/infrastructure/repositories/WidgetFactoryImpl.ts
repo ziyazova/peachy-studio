@@ -86,6 +86,7 @@ export class WidgetFactoryImpl implements WidgetFactory {
           endSound: 'bowl',
           breathPattern: 'coherent',
           showTimeLeft: true,
+          startBell: true,
         };
       default:
         return {};

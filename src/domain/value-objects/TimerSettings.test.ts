@@ -11,6 +11,7 @@ describe('TimerSettings', () => {
     expect(s.endSound).toBe('bowl');
     expect(s.breathPattern).toBe('coherent');
     expect(s.showTimeLeft).toBe(true);
+    expect(s.startBell).toBe(true);
     expect(s.embedWidth).toBe(360);
     expect(s.embedHeight).toBe(540);
     expect(s.theme).toBe('auto');
@@ -36,8 +37,10 @@ describe('TimerSettings', () => {
   });
 
   it('keeps falsy-but-valid values instead of falling back to defaults', () => {
-    // 0 means "interval bells off" and must survive the ?? guard.
-    const s = new TimerSettings({ intervalBellMin: 0, showTimeLeft: false, borderRadius: 0 });
+    // 0 means "interval bells off" and must survive the ?? guard; startBell
+    // defaults to TRUE, so an explicit false is the easy one to lose.
+    const s = new TimerSettings({ intervalBellMin: 0, showTimeLeft: false, borderRadius: 0, startBell: false });
+    expect(s.startBell).toBe(false);
     expect(s.intervalBellMin).toBe(0);
     expect(s.showTimeLeft).toBe(false);
     expect(s.borderRadius).toBe(0);

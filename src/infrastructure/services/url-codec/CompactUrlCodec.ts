@@ -46,6 +46,7 @@ export class CompactUrlCodec {
     breathPattern: 'mp',
     showTimeLeft: 'mt',
     bgPreset: 'mb',
+    startBell: 'mo',
 
     // Weather специфичные (w+символ)
     temperatureUnit: 'wu',
@@ -99,6 +100,7 @@ export class CompactUrlCodec {
     breathPattern: 'coherent',
     showTimeLeft: true,
     bgPreset: 'sage',
+    startBell: true,
 
     // Embed size (calendar defaults; clock overrides at decode)
     embedWidth: 420,

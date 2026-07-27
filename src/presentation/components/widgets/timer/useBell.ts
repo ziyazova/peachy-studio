@@ -73,6 +73,12 @@ export const BELL_VOICES: Record<Exclude<TimerEndSound, 'none'>, Voice> = {
 
 export const BELL_ORDER: Exclude<TimerEndSound, 'none'>[] = ['bowl', 'temple', 'crystal'];
 
+/** Everything the viewer can pick, muting included. */
+export const BELL_CHOICES: { value: TimerEndSound; label: string }[] = [
+  ...BELL_ORDER.map(v => ({ value: v as TimerEndSound, label: BELL_VOICES[v].label })),
+  { value: 'none', label: 'Silent' },
+];
+
 type AudioCtor = typeof AudioContext;
 
 function getAudioCtor(): AudioCtor | null {
@@ -159,10 +165,16 @@ export function useBell() {
     }
   }, []);
 
-  /** Preview a bell from a click — primes and rings in one gesture. */
-  const preview = useCallback((sound: TimerEndSound) => {
+  /**
+   * Ring from inside a click — primes and strikes in one gesture.
+   *
+   * Used both for previewing a bowl and for the opening strike, which is why it
+   * must go through `prime` first: on a cold context `ring` alone would find
+   * nothing to play into.
+   */
+  const preview = useCallback((sound: TimerEndSound, intensity: number = 0.85) => {
     prime();
-    ring(sound, 0.85);
+    ring(sound, intensity);
   }, [prime, ring]);
 
   return { prime, ring, preview };

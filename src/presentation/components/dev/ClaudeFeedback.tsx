@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { MessageSquarePlus, X, MessageSquare, Inspect, Sparkles, Palette } from 'lucide-react';
+import { MessageSquarePlus, X, MessageSquare, Inspect, Sparkles, Palette, FlaskConical } from 'lucide-react';
 import { useDevPanelsHidden } from './useDevPanelsHidden';
 import { useAuth } from '@/presentation/context/AuthContext';
 
@@ -412,6 +412,11 @@ export function ClaudeFeedback() {
           <DevRowLink href="/dev" title="Design system showcase (/dev)">
             <DevIcon><Palette /></DevIcon>
             <DevTitle>Design system</DevTitle>
+          </DevRowLink>
+
+          <DevRowLink href="/lab" title="Unreleased work — configure and grab embed links (/lab)">
+            <DevIcon><FlaskConical /></DevIcon>
+            <DevTitle>Lab</DevTitle>
           </DevRowLink>
         </DevPanel>
       )}

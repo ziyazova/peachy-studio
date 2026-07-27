@@ -30,6 +30,7 @@ export class TimerSettings {
   public readonly endSound: TimerEndSound;
   public readonly breathPattern: TimerBreathPattern;
   public readonly showTimeLeft: boolean;
+  public readonly startBell: boolean;
 
   constructor(settings: Partial<TimerSettings> = {}) {
     this.primaryColor = settings.primaryColor || '#667EEA';
@@ -52,6 +53,9 @@ export class TimerSettings {
     this.endSound = settings.endSound || 'bowl';
     this.breathPattern = settings.breathPattern || 'coherent';
     this.showTimeLeft = settings.showTimeLeft ?? true;
+    /* On by default: every meditation app strikes once at the start, so the
+       practitioner can close their eyes and go by ear alone. */
+    this.startBell = settings.startBell ?? true;
   }
 
   public static fromJson(json: string): TimerSettings {
@@ -80,6 +84,7 @@ export class TimerSettings {
       endSound: this.endSound,
       breathPattern: this.breathPattern,
       showTimeLeft: this.showTimeLeft,
+      startBell: this.startBell,
     });
   }
 
@@ -100,6 +105,7 @@ export class TimerSettings {
       endSound: changes.endSound ?? this.endSound,
       breathPattern: changes.breathPattern ?? this.breathPattern,
       showTimeLeft: changes.showTimeLeft ?? this.showTimeLeft,
+      startBell: changes.startBell ?? this.startBell,
     });
   }
 }

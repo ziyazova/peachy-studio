@@ -53,6 +53,15 @@ describe('[SMOKE] timer URL codec', () => {
     expect(decoded!.settings.bgPreset).toBe('plain');
   });
 
+  it('carries an explicitly-disabled opening bell through the URL', () => {
+    // startBell defaults to true, so `false` is the value that must survive —
+    // a default-omitting codec drops anything equal to its default.
+    const encoded = CompactUrlCodec.encode('timer', { style: 'bell', startBell: false });
+    const decoded = CompactUrlCodec.decode(encoded);
+    expect(decoded!.settings.startBell).toBe(false);
+    expect(new TimerSettings(decoded!.settings).startBell).toBe(false);
+  });
+
   it('returns durationMin as a number', () => {
     const encoded = CompactUrlCodec.encode('timer', { style: 'bell', durationMin: 20 });
     const decoded = CompactUrlCodec.decode(encoded);
