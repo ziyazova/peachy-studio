@@ -35,7 +35,16 @@ export const TimerSurface = styled.div<{
   /* Everything inside sizes in cqw, so the widget scales off its OWN width
      rather than the viewport — it has to look right from 200px to full width. */
   container-type: inline-size;
-  border-radius: ${({ $radius }) => $radius}px;
+  /* Radius as a PERCENTAGE, so it shrinks with the card.
+     A fixed px radius looked right at the design size and turned the widget
+     into a lozenge once the frame scaled it down. cqw cannot help here — an
+     element that establishes a container query context cannot query itself —
+     but percentages can, with one catch: the horizontal radius resolves
+     against the width and the vertical against the height, so equal
+     percentages on a 2:3 card give oval corners. Hence two values, each
+     derived from the setting against the matching reference side. */
+  border-radius: ${({ $radius }) => (($radius / 360) * 100).toFixed(3)}%
+                 / ${({ $radius }) => (($radius / 540) * 100).toFixed(3)}%;
   overflow: hidden;
   isolation: isolate;
   /* WebKit will not clip a COMPOSITED child to a rounded overflow — and the
@@ -185,7 +194,7 @@ export const ActionBlock = styled.div<{ $gapTop: number }>`
 `;
 
 export const TimeDisplay = styled.div<{ $color: string; $dim: boolean }>`
-  font-size: clamp(40px, 29cqw, 92px);
+  font-size: clamp(17px, 29cqw, 92px);
   font-weight: 400;
   letter-spacing: -0.025em;
   line-height: 0.95;
@@ -198,7 +207,7 @@ export const TimeDisplay = styled.div<{ $color: string; $dim: boolean }>`
 
 export const PhaseLabel = styled.div<{ $color: string }>`
   margin-top: clamp(10px, 4.4cqw, 20px);
-  font-size: clamp(9px, 3.1cqw, 12.5px);
+  font-size: clamp(6px, 3.1cqw, 12.5px);
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -238,7 +247,7 @@ export const ProgressFill = styled.div<{ $color: string; $percent: number }>`
 export const FieldLabel = styled.div<{ $color: string }>`
   align-self: flex-start;
   margin: 0 0 clamp(4px, 1.7cqw, 8px) clamp(3px, 1.4cqw, 6px);
-  font-size: clamp(8px, 2.9cqw, 11px);
+  font-size: clamp(6px, 2.9cqw, 11px);
   font-weight: 500;
   letter-spacing: 0.02em;
   color: ${({ $color }) => $color};
@@ -284,9 +293,9 @@ export const Segment = styled.button<{ $active: boolean; $ink: string; $material
   color: ${({ $ink, $material, $active }) => ($active ? $ink : $material)};
   opacity: ${({ $active }) => ($active ? 1 : 0.7)};
   border-radius: 999px;
-  padding: clamp(5px, 2cqw, 9px) clamp(2px, 1cqw, 6px);
+  padding: clamp(3px, 2cqw, 9px) clamp(1px, 1cqw, 6px);
   font-family: inherit;
-  font-size: clamp(8px, 2.9cqw, 12px);
+  font-size: clamp(6px, 2.9cqw, 12px);
   font-weight: 600;
   letter-spacing: 0.01em;
   white-space: nowrap;
@@ -318,9 +327,9 @@ export const ControlButton = styled.button<{
   background: ${({ $material, $filled }) => ($filled ? `${$material}D4` : 'rgba(255, 255, 255, 0.12)')};
   color: ${({ $ink, $material, $filled }) => ($filled ? $ink : $material)};
   border-radius: 999px;
-  padding: clamp(8px, 3cqw, 14px) clamp(18px, 7cqw, 32px);
+  padding: clamp(5px, 3cqw, 14px) clamp(10px, 7cqw, 32px);
   font-family: inherit;
-  font-size: clamp(10px, 3.6cqw, 14px);
+  font-size: clamp(7px, 3.6cqw, 14px);
   font-weight: 600;
   letter-spacing: 0.01em;
   cursor: pointer;
