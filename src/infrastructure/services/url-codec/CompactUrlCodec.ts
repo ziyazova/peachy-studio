@@ -104,6 +104,9 @@ export class CompactUrlCodec {
     bgPreset: 'sage',
     startBell: true,
     glassBlur: 16,
+    /* Without this the empty string is not recognised as the default and every
+       generated link carries a dead "mu":"" field. */
+    bgImageUrl: '',
 
     // Embed size (calendar defaults; clock overrides at decode)
     embedWidth: 420,
