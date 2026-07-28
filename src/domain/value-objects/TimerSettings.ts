@@ -42,7 +42,7 @@ export class TimerSettings {
     this.accentColor = settings.accentColor || '#f1f5f9';
     /* Much larger than the 12 other widgets default to — the card is a big
        portrait surface and a tight corner makes it read as a dialog box. */
-    this.borderRadius = settings.borderRadius ?? 38;
+    this.borderRadius = settings.borderRadius ?? 28;
     this.showBorder = settings.showBorder ?? false;
     this.embedWidth = settings.embedWidth ?? 360;
     /* Portrait, phone-ish. A square card left the controls cramped against the
