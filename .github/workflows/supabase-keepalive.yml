@@ -69,7 +69,26 @@ jobs:
             fi
           }
 
-          # Separate services, so activity is not concentrated in one of them.
+          # A real write, not a read. Reads can be served without meaningful
+          # database work, which is the likeliest reason a year of green runs
+          # still earned a pause warning. keepalive_ping() UPDATEs one row and
+          # returns the new timestamp, so the project records an actual
+          # transaction. The table it touches has RLS on with no policies and
+          # is reachable only through this function.
+          ping=$(curl -s --max-time 25 -X POST \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Content-Type: application/json" \
+            "${SUPABASE_URL}/rest/v1/rpc/keepalive_ping")
+          if echo "$ping" | grep -q '"20'; then
+            echo "ok    DB write (keepalive_ping) -> $ping"
+          else
+            echo "::error::keepalive_ping did not return a timestamp: $ping"
+            failed=1
+          fi
+
+          # Reads across the other services, so activity is not concentrated
+          # in one of them and an outage anywhere shows up here.
           hit "REST widgets"   "/rest/v1/widgets?select=id&limit=1"
           hit "REST profiles"  "/rest/v1/profiles?select=id&limit=1"
           hit "Auth settings"  "/auth/v1/settings"
@@ -80,4 +99,4 @@ jobs:
             exit 1
           fi
 
-          echo "All checks returned 200."
+          echo "Write succeeded and all reads returned 200."
