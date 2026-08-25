@@ -1,43 +1,83 @@
 name: Supabase keep-alive
 
-# Free-tier Supabase projects pause after ~7 days with no API/DB activity,
-# which makes the *.supabase.co host stop resolving (ERR_NAME_NOT_RESOLVED)
-# and breaks login + widget saving. This workflow runs a tiny REST query
-# every day so Supabase always sees recent activity and never pauses.
+# Free-tier Supabase projects pause after ~7 days without "sufficient
+# activity", which takes login and widget saving down with them.
 #
-# Runs on GitHub's infrastructure, so it works even when no one's computer
-# is on. Cost is negligible (one ~1s curl per day).
+# The first version of this workflow ran one SELECT a day and treated any
+# 2xx OR 4xx as success. It reported green every single day — the logs
+# confirm a real HTTP 200 — and Supabase still sent a pause warning on
+# 2026-08-25. Two lessons went into this rewrite:
+#
+#   1. Their threshold is "sufficient" activity, not "any" activity, and it
+#      is documented nowhere. One row read once a day sits under it.
+#   2. Accepting 4xx as proof of life was unsound. A 401 or 404 is rejected
+#      before the database is touched, so the job could have been green
+#      while doing nothing at all. Only 200 counts here.
+#
+# So: three runs a day instead of one, each touching REST, Auth and Storage
+# rather than a single endpoint. Anything other than 200 fails the job, so a
+# rotated key or a renamed table surfaces as a red run instead of silence.
+#
+# Honest caveat: with an undocumented threshold this lowers the risk but
+# cannot remove it. The only guarantee Supabase offers is the Pro plan.
 
 on:
   schedule:
-    # 06:00 UTC daily. GitHub may delay/skip scheduled runs under load,
-    # so daily (vs every few days) keeps a safe margin under the 7-day window.
-    - cron: '0 6 * * *'
-  workflow_dispatch: {} # allow manual "Run workflow" from the Actions tab
+    # Three times a day, spread out. GitHub delays or drops scheduled runs
+    # under load, so spacing them means one skipped run is never the only
+    # activity that day.
+    - cron: '0 2 * * *'
+    - cron: '0 10 * * *'
+    - cron: '0 18 * * *'
+  workflow_dispatch: {}
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Query Supabase REST to register activity
+      - name: Exercise Supabase so the project registers activity
         env:
           SUPABASE_URL: https://vyycfwgkawtqkjllvsuc.supabase.co
-          # Public anon key (same one shipped in the browser bundle, RLS-protected).
-          # Stored as a repo secret so rotating the key doesn't require a code edit.
+          # Public anon key (the same one shipped in the browser bundle and
+          # protected by RLS). A repo secret so rotation needs no code edit.
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          if [ -z "$SUPABASE_ANON_KEY" ]; then
+          set -uo pipefail
+
+          if [ -z "${SUPABASE_ANON_KEY}" ]; then
             echo "::error::SUPABASE_ANON_KEY secret is not set. Add it in Settings -> Secrets and variables -> Actions."
             exit 1
           fi
-          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 \
-            -H "apikey: $SUPABASE_ANON_KEY" \
-            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-            "$SUPABASE_URL/rest/v1/widgets?select=id&limit=1")
-          echo "Supabase REST responded with HTTP $code"
-          # 200 = healthy. Any 2xx/4xx still means the request reached the
-          # project (= activity). Only a network failure (000) is a problem.
-          if [ "$code" = "000" ]; then
-            echo "::error::Could not reach Supabase — project may be paused or deleted."
+
+          failed=0
+
+          hit() {
+            label="$1"; path="$2"
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 25 \
+              -H "apikey: ${SUPABASE_ANON_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+              "${SUPABASE_URL}${path}")
+            if [ "$code" = "200" ]; then
+              echo "ok    $label -> HTTP $code"
+            else
+              # Not a warning to skim past: 000 means the host did not resolve
+              # (project paused or deleted), 401 means the key is wrong or
+              # rotated, 404 means the table moved. Each of those means this
+              # workflow has stopped protecting anything.
+              echo "::error::$label returned HTTP $code (expected 200)"
+              failed=1
+            fi
+          }
+
+          # Separate services, so activity is not concentrated in one of them.
+          hit "REST widgets"   "/rest/v1/widgets?select=id&limit=1"
+          hit "REST profiles"  "/rest/v1/profiles?select=id&limit=1"
+          hit "Auth settings"  "/auth/v1/settings"
+          hit "Storage buckets" "/storage/v1/bucket"
+
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::Supabase keep-alive failed — check the project in the dashboard."
             exit 1
           fi
+
+          echo "All checks returned 200."
