@@ -34,4 +34,19 @@ export const FEATURES = {
    * precedence and skips this path entirely) once real gallery shots land.
    */
   DUPLICATE_SINGLE_IMAGE_SLIDES: false,
+
+  /**
+   * Polar-hosted "Buy Now · $X" checkout on template pages.
+   *
+   * OFF while every template is fulfilled through Etsy. This button is
+   * gated by `etsyId` (parsed from `template.etsyUrl`), NOT by
+   * ENABLE_LOCAL_CHECKOUT — that flag only governs the local cart — so
+   * filling in etsyUrl had the side effect of showing a second, Polar
+   * checkout next to "Buy on Etsy". One product, two prices, two
+   * fulfilment paths.
+   *
+   * Flip to true once Polar one-time products are live and their prices
+   * are the source of truth.
+   */
+  ENABLE_POLAR_CHECKOUT: false,
 } as const;

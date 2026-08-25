@@ -1132,7 +1132,14 @@ const RelatedPreview = styled.div`
   top: 50%;
   transform: translateY(-50%) scale(0.95);
   width: 320px;
-  aspect-ratio: 4 / 3;
+  /* No fixed aspect-ratio. The frame used to be locked to 4/3 (1.333)
+   * while the mockups are 2678x2106 (1.272) — with object-fit: contain
+   * the picture touched one pair of edges and left slack on the other,
+   * so the border sat at a different distance on every side. Letting the
+   * box height follow the image and spacing it with a uniform padding
+   * keeps all four margins identical for any mockup ratio, including the
+   * handful that deviate (1.240 / 1.328). */
+  padding: 12px;
   border-radius: ${({ theme }) => theme.radii.lg};
   overflow: hidden;
   border: 1px solid ${({ theme }) => theme.colors.border.light};
@@ -1148,19 +1155,14 @@ const RelatedPreview = styled.div`
     transform: translateY(-50%) scale(1);
   }
 
-  /* 96% (was 75%) — the mockup sat small inside a wide field of
-   * gradient, so the product read as an afterthought rather than the
-   * subject. +28% per "продукт маленький, увеличить процентов на 28-30".
-   * object-fit: contain keeps the aspect intact, so the extra size is
-   * real growth, not a crop. */
+  /* Fills the padded box exactly, so the image itself sets the frame's
+   * height. Roughly +29% over the previous 75%-of-a-letterboxed-4/3 box,
+   * per "продукт маленький, увеличить процентов на 28-30" — and now the
+   * growth costs no balance, since the padding is the only margin. */
   img {
-    width: 96%;
-    height: 96%;
-    object-fit: contain;
     display: block;
-    margin: auto;
-    position: absolute;
-    inset: 0;
+    width: 100%;
+    height: auto;
     filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.1));
   }
 
@@ -1545,7 +1547,7 @@ export const TemplateDetailPage: React.FC = () => {
               <BenefitRow><Check /> Lifetime Updates</BenefitRow>
 
               <BtnGroup>
-                {etsyId && !isFree && (
+                {FEATURES.ENABLE_POLAR_CHECKOUT && etsyId && !isFree && (
                   <Button
                     $variant="primary"
                     $size="lg"
@@ -1705,7 +1707,7 @@ export const TemplateDetailPage: React.FC = () => {
           their side and may differ. The in-page <BtnGroup> hides these
           buttons on mobile so the bar is the only fulfillment surface
           on phone. */}
-      {(etsyId || template.etsyUrl || FEATURES.ENABLE_LOCAL_CHECKOUT) && (
+      {((FEATURES.ENABLE_POLAR_CHECKOUT && etsyId) || template.etsyUrl || FEATURES.ENABLE_LOCAL_CHECKOUT) && (
         <MobileBuyBar>
           {FEATURES.ENABLE_LOCAL_CHECKOUT && inCart ? (
             <Button $variant="success" $size="lg" onClick={() => removeItem(template.id)}>
@@ -1713,14 +1715,14 @@ export const TemplateDetailPage: React.FC = () => {
             </Button>
           ) : (
             <>
-              {etsyId && !isFree && (
+              {FEATURES.ENABLE_POLAR_CHECKOUT && etsyId && !isFree && (
                 <Button $variant="primary" $size="lg" onClick={handleBuyNow} disabled={buying}>
                   {buying ? 'Opening…' : `Buy Now · ${template.price}`}
                 </Button>
               )}
               {template.etsyUrl && (
                 <Button
-                  $variant={etsyId && !isFree ? 'secondary' : 'primary'}
+                  $variant={FEATURES.ENABLE_POLAR_CHECKOUT && etsyId && !isFree ? 'secondary' : 'primary'}
                   $size="lg"
                   as="a"
                   href={template.etsyUrl}
