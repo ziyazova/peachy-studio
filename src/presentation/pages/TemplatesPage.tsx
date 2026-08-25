@@ -312,7 +312,12 @@ export const TemplatesPage: React.FC = () => {
       <TopNav activeLink="templates" logoSub="Templates" />
 
       <Header>
-        <BackButton onClick={() => navigate(-1 as any)} label="Back" />
+        {/* Fixed destination, not navigate(-1): browser history sent the
+            visitor back to whichever template they had opened before landing
+            here, so Back looped between the grid and a detail page instead of
+            leaving the section. /templates is top-level, so its Back goes home
+            — the same fixed-target pattern the detail page already uses. */}
+        <BackButton onClick={() => navigate('/')} label="Back" />
         <PageTitle>{activeCatConfig?.title || 'Templates'}</PageTitle>
         <PageSubtitle>{activeCatConfig?.subtitle || ''}</PageSubtitle>
         {/* TODO: unhide search when ready
