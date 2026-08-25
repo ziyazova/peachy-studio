@@ -1,3 +1,4 @@
+import { WebpImage } from '@/presentation/components/shared';
 import React, { useState, useCallback, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { ArrowRight, Calendar, Clock, Image, Pencil, Lock, Sparkle, Check } from 'lucide-react';
@@ -1827,16 +1828,16 @@ export const WidgetStudioPage: React.FC = () => {
       <HeroScene>
         {/* Floating widget PNGs with transparent bg */}
         <FloatingWidget $left="-104px" $top="64px" $delay="0s" $anim={1} data-float data-speed="1.2" style={{ width: 256 }}>
-          <img src="/float-typewriter.png" alt="Typewriter Calendar" />
+          <WebpImage src="/float-typewriter.png" alt="Typewriter Calendar" loading="lazy" />
         </FloatingWidget>
         <FloatingWidget $right="-94px" $top="74px" $delay="-3.4s" $anim={2} data-float data-speed="0.8" style={{ width: 296 }}>
-          <img src="/float-collage.png" alt="Collage Calendar" />
+          <WebpImage src="/float-collage.png" alt="Collage Calendar" loading="lazy" />
         </FloatingWidget>
         <FloatingWidget $left="-44px" $top="380px" $delay="-5.8s" $anim={3} data-float data-speed="1.5" style={{ width: 307 }}>
-          <img src="/float-clock.png" alt="Flower Clock" />
+          <WebpImage src="/float-clock.png" alt="Flower Clock" loading="lazy" />
         </FloatingWidget>
         <FloatingWidget $right="-46px" $top="396px" $delay="-2.1s" $anim={4} data-float data-speed="1" style={{ width: 279 }}>
-          <img src="/float-camera.png" alt="Camera Widget" />
+          <WebpImage src="/float-camera.png" alt="Camera Widget" loading="lazy" />
         </FloatingWidget>
 
         <HeroCard>

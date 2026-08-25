@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ChevronDown, Eye, ShoppingCart, Check } from 'lucide-react';
 import { TopNav } from '../components/layout/TopNav';
-import { PageWrapper, BackButton, Button, Card, Accordion, TemplateMockupCard, TemplateMockupImage, LandingFooter } from '@/presentation/components/shared';
+import { PageWrapper, BackButton, Button, Card, Accordion, TemplateMockupCard, TemplateMockupImage, LandingFooter, WebpImage } from '@/presentation/components/shared';
 import { fadeUp } from '@/presentation/themes/animations';
 import { TEMPLATES, FAQ_ITEMS, getTemplateEtsyId } from '@/presentation/data/templates';
 import { useCart } from '@/presentation/context/CartContext';
@@ -1581,7 +1581,11 @@ export const TemplateDetailPage: React.FC = () => {
                       href={template.etsyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      $variant="outline"
+                      /* Outline only while a primary "Buy Now" sits above it.
+                         With Polar checkout off, Etsy is the single path to
+                         purchase, so it takes the primary weight — the mobile
+                         bar already switches the same way. */
+                      $variant={FEATURES.ENABLE_POLAR_CHECKOUT && etsyId && !isFree ? 'outline' : 'primary'}
                       $size="lg"
                       $fullWidth
                     >
@@ -1650,7 +1654,7 @@ export const TemplateDetailPage: React.FC = () => {
               <RelatedGrid>
                 {related.map(r => (
                   <RelatedCard key={r.id} onClick={() => navigate(`/templates/${r.id}`)}>
-                    <RelatedPreview><img src={r.image} alt={r.title} /></RelatedPreview>
+                    <RelatedPreview><WebpImage src={r.image} alt={r.title} loading="lazy" /></RelatedPreview>
                     <RelatedThumbSlot>
                       <TemplateMockupCard $size="thumb" $interactive>
                         <TemplateMockupImage $size="thumb" src={r.image} alt={r.title} />
@@ -1674,7 +1678,7 @@ export const TemplateDetailPage: React.FC = () => {
             <RelatedGrid>
               {related.map(r => (
                 <RelatedCard key={r.id} onClick={() => navigate(`/templates/${r.id}`)}>
-                  <RelatedPreview><img src={r.image} alt={r.title} /></RelatedPreview>
+                  <RelatedPreview><WebpImage src={r.image} alt={r.title} loading="lazy" /></RelatedPreview>
                   <RelatedThumbSlot>
                     <TemplateMockupCard $size="thumb" $interactive>
                       <TemplateMockupImage $size="thumb" $hoverZoom={false} src={r.image} alt={r.title} />

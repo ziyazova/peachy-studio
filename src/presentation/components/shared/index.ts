@@ -97,3 +97,4 @@ export { StudioText } from './StudioText';
 export type { StudioTextStyle } from './StudioText';
 export { CopyButton } from './CopyButton';
 export type { CopyButtonProps } from './CopyButton';
+export { WebpImage } from './WebpImage';

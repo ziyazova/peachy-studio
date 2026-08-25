@@ -1,3 +1,4 @@
+import { WebpImage } from '@/presentation/components/shared';
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -584,7 +585,7 @@ export const FeatureCardsSection: React.FC = () => {
                 <FeatureCardDesc>{f.desc}</FeatureCardDesc>
               </FeatureCardText>
               <FeatureCardImage $color={f.color}>
-                <img src={f.image} alt={f.tab} loading="lazy" />
+                <WebpImage src={f.image} alt={f.tab} loading="lazy" />
               </FeatureCardImage>
             </FeatureCardBody>
           </FeatureCard>

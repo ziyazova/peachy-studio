@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import type { ImgHTMLAttributes } from 'react';
 import {
   templateCardGradient,
   templateCardShadow,
@@ -69,7 +70,7 @@ export const TemplateMockupCard = styled.div<TemplateMockupCardProps>`
     with a soft drop-shadow. Use inside <TemplateMockupCard>. Pass
     `$hoverZoom` to scale the image when the parent card is hovered —
     default on, off for static carousel slides. */
-export const TemplateMockupImage = styled.img<{
+const MockupImg = styled.img<{
   $size?: TemplateCardSize;
   $hoverZoom?: boolean;
 }>`
@@ -98,3 +99,38 @@ export const TemplateMockupImage = styled.img<{
       }
     `}
 `;
+
+/* <picture> is layout-transparent via display: contents, so MockupImg stays
+   the box the parent card positions and the existing
+   `${TemplateMockupCard}:hover &` selectors keep matching it. */
+const PictureShell = styled.picture`
+  display: contents;
+`;
+
+/**
+ * Serves a WebP twin of every .png in /public and falls back to the PNG
+ * for anything that cannot decode it. The mockups are screenshots shipped
+ * as PNG, which is why they ran 1.3–1.8MB each; the same frames re-encoded
+ * at q85 land at 0.16–0.17MB, an 87–95% cut with no visible difference at
+ * the sizes these are displayed. Both files sit in /public, so a missing
+ * or stale .webp simply means the browser uses the PNG it always did.
+ */
+export const TemplateMockupImage = ({
+  src,
+  ...rest
+}: ImgHTMLAttributes<HTMLImageElement> & {
+  $size?: TemplateCardSize;
+  $hoverZoom?: boolean;
+}) => {
+  const webp =
+    typeof src === 'string' && src.endsWith('.png')
+      ? src.replace(/\.png$/, '.webp')
+      : null;
+
+  return (
+    <PictureShell>
+      {webp && <source srcSet={webp} type="image/webp" />}
+      <MockupImg src={src} {...rest} />
+    </PictureShell>
+  );
+};
