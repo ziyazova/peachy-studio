@@ -54,6 +54,22 @@
       background: transparent;
     }
 
+    /* No-JS fallback below (#boot-fallback) must never flash on a healthy
+       load. The browser paints the HTML long before the bundle is fetched and
+       executed, so the markup was visible for a beat on every page. It now
+       starts invisible and only fades in after 2.5s — by which point React has
+       already replaced #root's contents anywhere scripts actually run. When
+       they never run (the Notion mobile app case this was built for) nothing
+       clears it and it appears as intended. */
+    #boot-fallback {
+      opacity: 0;
+      animation: boot-fallback-in 0.2s linear 2.5s forwards;
+    }
+
+    @keyframes boot-fallback-in {
+      to { opacity: 1; }
+    }
+
     #root {
       display: flex;
       flex-direction: column;
@@ -106,7 +122,7 @@
        not our code) and the graceful degradation (something legible instead of
        a blank rectangle). Inline styles only: styled-components injects its CSS
        from JavaScript, so no stylesheet of ours exists at this point. -->
-  <div id="root"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"><div style="width:100%;max-width:360px;aspect-ratio:2/3;border-radius:38px;background:linear-gradient(152deg,#396539 0%,#2E5230 38%,#244228 70%,#19321E 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;box-sizing:border-box;padding:9%"><div style="font-size:56px;font-weight:400;letter-spacing:-0.025em;line-height:1">10:00</div><div style="margin-top:14px;font-size:11px;font-weight:500;letter-spacing:0.18em;opacity:0.6">MEDITATION</div><div style="margin-top:28px;font-size:12px;line-height:1.5;opacity:0.65;text-align:center;max-width:260px">Interactive timer needs JavaScript.<br>Open this widget in a browser to use it.</div></div></div></div>
+  <div id="root"><div id="boot-fallback" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"><div style="width:100%;max-width:360px;aspect-ratio:2/3;border-radius:38px;background:linear-gradient(152deg,#396539 0%,#2E5230 38%,#244228 70%,#19321E 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;box-sizing:border-box;padding:9%"><div style="font-size:56px;font-weight:400;letter-spacing:-0.025em;line-height:1">10:00</div><div style="margin-top:14px;font-size:11px;font-weight:500;letter-spacing:0.18em;opacity:0.6">MEDITATION</div><div style="margin-top:28px;font-size:12px;line-height:1.5;opacity:0.65;text-align:center;max-width:260px">Interactive timer needs JavaScript.<br>Open this widget in a browser to use it.</div></div></div></div>
 
   <!-- Boot watchdog.
        Deliberately plain ES5 in a NON-module script, placed BEFORE the bundle.
