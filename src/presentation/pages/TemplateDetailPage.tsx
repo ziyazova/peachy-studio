@@ -1148,9 +1148,14 @@ const RelatedPreview = styled.div`
     transform: translateY(-50%) scale(1);
   }
 
+  /* 96% (was 75%) — the mockup sat small inside a wide field of
+   * gradient, so the product read as an afterthought rather than the
+   * subject. +28% per "продукт маленький, увеличить процентов на 28-30".
+   * object-fit: contain keeps the aspect intact, so the extra size is
+   * real growth, not a crop. */
   img {
-    width: 75%;
-    height: 75%;
+    width: 96%;
+    height: 96%;
     object-fit: contain;
     display: block;
     margin: auto;
@@ -1352,14 +1357,18 @@ export const TemplateDetailPage: React.FC = () => {
    * row so both views render the same set of slides.
    *
    * Placeholder duplication: when the template has only a single image,
-   * the cover is duplicated into 3 slides so the carousel UX is visible
+   * the cover can be duplicated into 3 slides so the carousel UX is visible
    * end-to-end. Per "задублируй картинку как заготовку, я потом заменю"
-   * (c_2026-04-28). When real `images` arrive, this duplication is
-   * skipped automatically. */
+   * (c_2026-04-28). Now gated behind FEATURES.DUPLICATE_SINGLE_IMAGE_SLIDES,
+   * which is off while templates ship a single cover — three identical
+   * slides read as a bug to a visitor. When real `images` arrive they take
+   * precedence and this path is skipped regardless of the flag. */
   const gallery = useMemo<string[]>(() => {
     if (!template) return [];
     if (template.images && template.images.length > 0) return template.images;
-    return [template.image, template.image, template.image];
+    return FEATURES.DUPLICATE_SINGLE_IMAGE_SLIDES
+      ? [template.image, template.image, template.image]
+      : [template.image];
   }, [template]);
   const slides = gallery.map((_, i) => i);
 

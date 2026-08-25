@@ -18,5 +18,20 @@ export const FEATURES = {
    * At that point we restore cart/checkout and render BOTH buttons on every
    * template (Path D — buyer picks Peachy or Etsy).
    */
-  ENABLE_LOCAL_CHECKOUT: true,
+  ENABLE_LOCAL_CHECKOUT: false,
+
+  /**
+   * Placeholder duplication of a template's cover image into 3 carousel
+   * slides, so the carousel UX reads as a carousel before real photos exist.
+   *
+   * OFF while templates still ship a single cover: three identical slides
+   * made the chevrons and the "3 photos" counter look broken to a visitor.
+   * With this off the gallery returns one slide and every control hides
+   * itself through the existing `gallery.length > 1` guards — nothing is
+   * removed from the tree.
+   *
+   * Flip back to true (or simply populate `template.images`, which takes
+   * precedence and skips this path entirely) once real gallery shots land.
+   */
+  DUPLICATE_SINGLE_IMAGE_SLIDES: false,
 } as const;
